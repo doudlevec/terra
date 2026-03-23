@@ -1,0 +1,2847 @@
+<!DOCTYPE html>
+
+<html lang="cs"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>Polední menu</title>
+<style>
+@page {
+  size:A4;
+  margin:10mm 12mm 10mm 12mm; /* vycentrované okraje */
+}
+
+html,body{
+  margin:0;
+  padding:0;
+  background:#fff;
+  color:#000;
+}
+
+body{
+  font-family:Calibri, Arial, sans-serif;
+  font-size:12.2pt;
+  line-height:1.18;
+  -webkit-print-color-adjust:exact;
+  print-color-adjust:exact;
+}
+
+/* A4 šířka po okrajích: 210 - 12 - 12 = 186mm */
+.page{
+  width:186mm;
+  margin:0 auto;
+}
+
+/* HLAVIČKA */
+.top{
+  display:grid;
+  grid-template-columns:40mm 1fr 16mm;
+  column-gap:6mm;
+  align-items:start;
+  margin-top:2mm;
+}
+
+.logo{
+  width:24mm;
+  height:24mm;
+  object-fit:contain;
+  filter: contrast(1.18) brightness(1.05) saturate(1.05);
+  image-rendering:-webkit-optimize-contrast;
+}
+
+.titleWrap{text-align:center;}
+
+.title{
+  font-family:"Times New Roman",Times,serif;
+  font-size:24pt;
+  font-weight:400;
+  margin:0 0 4mm 0;
+  white-space:nowrap;
+}
+
+.pay{
+  max-height:3.45em;
+  overflow:hidden;
+
+  font-style:italic;
+  font-weight:700;
+  color:#d40000;
+  text-decoration:underline;
+  font-size:12.6pt;
+  white-space:nowrap;
+  display:inline-block;
+  max-width:none;
+  line-height:1.15;
+  overflow-wrap:normal;
+  margin:0;
+}
+#dateRange{
+  display:inline-block;
+  max-width:none;
+  white-space:nowrap;
+}
+
+
+@media screen and (max-width:700px){
+  .title{font-size:18pt;}
+  .pay{font-size:10pt;}
+}
+
+.content{margin-top:6mm;}
+
+/* DNY */
+.day{margin:0 0 5mm 0;}
+
+.dayName{
+  font-size:13.2pt;
+  font-weight:400;
+  text-decoration:underline;
+  margin:0 0 1.5mm 0;
+}
+
+/* MENU TABULKA */
+table.menu{width:100%;border-collapse:collapse;}
+
+table.menu td{
+  padding:0.55mm 0;
+  vertical-align:top;
+}
+
+td.num{width:6mm;text-align:right;padding-right:1.5mm;}
+
+td.text{padding-right:2mm;}
+
+td.price{width:16mm;white-space:nowrap;padding-right:2mm;}
+
+/* ALERGENY – šedé i na výtisku */
+td.alg{
+  width:26mm;
+  color:#777;
+  font-size:10.8pt;
+  white-space:nowrap;
+}
+
+tr.soup td.num{color:transparent;}
+
+/* POZNÁMKA DOLE – šedá i na výtisku */
+.foot{
+  margin-top:2.5mm;
+  font-size:10.3pt;
+  color:#777;
+}
+
+/* TLAČÍTKA */
+.controls{
+  margin-top:6mm;
+  display:flex;
+  justify-content:center;
+  gap:12px;
+}
+
+.btn{
+  font-size:11pt;
+  padding:6px 14px;
+  border:1px solid #333;
+  border-radius:8px;
+  background:#f3f3f3;
+  cursor:pointer;
+}
+
+.btn:active{transform:translateY(1px);}
+
+/* držet bloky pohromadě */
+.day,table.menu,tr,td{break-inside:avoid;page-break-inside:avoid;}
+
+@media print{
+
+  /* widen first column for print spacing */
+  .terra-menu td.label{
+    width:35mm !important;
+    padding-right:4mm !important;
+  }
+
+  .controls{display:none !important;}
+}
+body.print2x .no-print { display:none !important; }
+  body.print2x #print2xWrap{
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    gap: 0 !important;
+    padding: 8mm !important; /* bílé okraje podobně jako tisk */
+    box-sizing: border-box !important;
+  }
+  body.print2x #print2xWrap .copy{
+    flex: 1 1 0 !important;
+    max-width: 50% !important;
+    box-sizing: border-box !important;
+    padding: 0 4mm !important;
+  }
+  body.print2x #print2xWrap .divider{
+    width: 0 !important;
+    border-left: 1px solid rgba(0,0,0,.25) !important; /* jemná čára pro rozstřižení */
+  }
+  body.print2x #print2xWrap .copy .page{
+    transform: scale(0.95);
+    transform-origin: top left;
+  }
+}
+#btnPrint2x{
+  cursor:pointer;
+}
+/* FIX: tisk 2× na jednu A4 – schovej původní stránku a vytiskni jen wrapper */
+@media print{
+  body.print2x > *{ display:none !important; }
+  body.print2x #print2xWrap{
+    display:flex !important;
+    position:fixed !important;
+    inset:0 !important;
+    overflow:hidden !important; /* zabrání dalším stránkám */
+    padding:8mm !important;     /* bílé okraje */
+    box-sizing:border-box !important;
+  }
+  body.print2x #print2xWrap .copy{
+    flex:1 1 0 !important;
+    max-width:50% !important;
+    overflow:hidden !important;
+    padding:0 4mm !important;
+    box-sizing:border-box !important;
+  }
+  body.print2x #print2xWrap .divider{
+    width:0 !important;
+    border-left:1px solid rgba(0,0,0,.25) !important;
+  }
+  /* místo škálování vnitřní .page (která může mít vlastní okraje) škáluj celý klon */
+  body.print2x #print2xWrap .copy > *{
+    transform:scale(.98);
+    transform-origin:top left;
+  }
+}
+/* --- Tisk 2× jídelák na 1× A4 (naležato) – stejné jako běžný tisk, jen zmenšené --- */
+@media print{
+  /* když tiskneme 2×, vytiskne se pouze wrapper (žádné další stránky) */
+  body.print2x > *{ display:none !important; }
+  body.print2x #print2xWrap{
+    display:flex !important;
+    position:fixed !important;
+    inset:0 !important;
+    overflow:hidden !important;
+    box-sizing:border-box !important;
+    padding:6mm !important; /* malý okraj kolem */
+    gap:2mm !important;     /* mezera mezi jídeláky */
+    background:#fff !important;
+  }
+  body.print2x #print2xWrap .copy{
+    flex:1 1 0 !important;
+    display:flex !important;
+    justify-content:center !important;
+    align-items:flex-start !important;
+    overflow:hidden !important;
+    box-sizing:border-box !important;
+  }
+
+  /* virtuální A4 na výšku (stejné okraje jako v @page běžného tisku) */
+  body.print2x .virtualPaper{
+    width:210mm !important;
+    height:297mm !important;
+    box-sizing:border-box !important;
+    padding:10mm 15mm 10mm 15mm !important; /* stejné okraje jako @page v běžném tisku */
+    background:#fff !important;
+    overflow:hidden !important;
+    transform:scale(0.667) !important; /* dvě A4 na šířku A4 – vychází ~2/3 */
+    transform-origin:top left !important;
+  }
+
+  /* jemná čára pro rozstřižení */
+  body.print2x #print2xWrap .divider{
+    width:0 !important;
+    border-left:1px solid rgba(0,0,0,.25) !important;
+  }
+
+  /* vypnout vlastní @page margin během 2× tisku (margin si řeší virtualPaper padding) */
+  }
+/* --- 2× tisk v6.1 – aby se nic neuseklo a text byl větší --- */
+@media print{
+  body.print2x #print2xWrap{
+    padding:4mm !important;
+    gap:1.5mm !important;
+  }
+  body.print2x .virtualPaper{
+    padding:7mm 7mm 7mm 7mm !important; /* menší a vycentrované okraje uvnitř kopie */
+    transform:scale(0.64) !important;    /* o trochu menší měřítko – vejde se celý obsah */
+    font-size:1.12em !important;         /* trochu větší text */
+  }
+}
+/* --- 2× tisk v6.2 – neusekávat pravé sloupce (ceny + alergeny) --- */
+@media print{
+  body.print2x #print2xWrap{
+    padding:3mm !important;
+    gap:1mm !important;
+    overflow:hidden !important; /* hlídá 1 stránku */
+  }
+  body.print2x #print2xWrap .copy{
+    overflow:visible !important; /* NIC neusekávej uvnitř kopie */
+  }
+  body.print2x .virtualPaper{
+    /* o něco menší okraje uvnitř + menší měřítko */
+    padding:6mm 6mm 6mm 6mm !important;
+    transform:scale(0.62) !important;
+    transform-origin:top center !important;
+    overflow:visible !important; /* dovol zobrazit celé tabulky */
+    font-size:1.14em !important;
+  }
+}
+
+/* --- ÚPRAVA: odsazení menu --- */
+table.menu{
+  margin-left:4mm;
+  table-layout:fixed;
+}
+td.text{
+  padding-left:2mm;
+}
+
+/* --- ÚPRAVA: zarovnání názvů dnů na sloupec čísel jídel --- */
+/* čísla jsou ve sloupci width 6mm a zarovnaná vpravo,
+   proto je den posunut přibližně o 8.5mm */
+.dayName{
+  margin-left:8.5mm;
+}
+
+
+
+
+/* --- MOBIL: oprava překryvu sloupce čísla jídel + zalomení spodních tlačítek --- */
+@media screen and (max-width:700px){
+  table.menu{
+    margin-left:0;
+    table-layout:fixed;
+    width:100%;
+  }
+  table.menu td{
+    box-sizing:border-box;
+  }
+  td.num{
+    width:5mm;
+    padding-right:0.8mm;
+    white-space:nowrap;
+  }
+  td.text{
+    padding-left:0.8mm;
+    padding-right:1.2mm;
+    overflow-wrap:anywhere;
+    word-break:normal;
+  }
+  td.price{
+    width:14mm;
+    padding-right:1.2mm;
+    white-space:nowrap;
+  }
+  td.alg{
+    width:21mm;
+    font-size:10.1pt;
+    white-space:nowrap;
+  }
+  .dayName{
+    margin-left:5.8mm;
+  }
+  .controls{
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:8px;
+  }
+  .controls .btn{
+    flex:0 1 calc(50% - 8px);
+    min-width:0;
+    padding:6px 8px;
+    font-size:10pt;
+  }
+}
+
+/* --- EDIT MODE (ruční úpravy) --- */
+body.editMode .editable{
+  outline: 1px dashed rgba(0,0,0,.35);
+  outline-offset: 2px;
+}
+body.editMode .editable:focus{
+  outline: 2px solid rgba(0,0,0,.55);
+}
+
+
+/* --- Export do vybrané složky --- */
+.export-bar{
+  margin-top:8px;
+  text-align:center;
+  font-size:10.5pt;
+  color:#444;
+}
+.export-bar .path{
+  font-weight:700;
+}
+
+
+/* --- 2× tisk: doladění, aby nebylo nutné ručně nastavovat 115 % --- */
+@media print{
+  body.print2x #print2xWrap{
+    padding:2mm !important;
+    gap:0.5mm !important;
+  }
+  body.print2x .virtualPaper{
+    padding:5mm 5mm 5mm 5mm !important;
+    transform:scale(0.713) !important; /* cca původních 115 % */
+    transform-origin:top left !important;
+    font-size:1.14em !important;
+  }
+}
+
+
+/* --- FINÁLNÍ 2× tisk A4: bez ořezu vlevo a bez velkého bílého okraje vpravo --- */
+@media print{
+  body.print2x #print2xWrap{
+    position:fixed !important;
+    inset:0 !important;
+    width:297mm !important;
+    height:210mm !important;
+    padding:0 !important;
+    margin:0 !important;
+    gap:0 !important;
+    background:#fff !important;
+    box-sizing:border-box !important;
+    overflow:hidden !important;
+    display:block !important;
+  }
+  body.print2x #print2xWrap .copy{
+    position:absolute !important;
+    top:0 !important;
+    width:148.5mm !important;
+    height:210mm !important;
+    padding:0 !important;
+    margin:0 !important;
+    overflow:hidden !important;
+    display:block !important;
+    box-sizing:border-box !important;
+  }
+  body.print2x #print2xWrap .copy.first{ left:0 !important; }
+  body.print2x #print2xWrap .copy.second{ left:148.5mm !important; }
+  body.print2x #print2xWrap .divider{ display:none !important; }
+
+  body.print2x .virtualPaper{
+    width:210mm !important;
+    height:297mm !important;
+    padding:6mm 6mm 6mm 6mm !important;
+    box-sizing:border-box !important;
+    background:#fff !important;
+    overflow:hidden !important;
+    transform: translate(2.6mm,0.8mm) scale(0.705) !important;
+    transform-origin:top left !important;
+    font-size:1.14em !important;
+    margin:0 !important;
+  }
+  body.print2x .terra-menu .label{
+    width:34mm !important;
+    white-space:nowrap !important;
+    padding-right:2.2mm !important;
+  }
+  body.print2x .terra-menu .text{
+    padding-left:1.8mm !important;
+  }
+}
+
+
+@media print{
+  #exportFolderInfo{display:none !important;}
+}
+
+
+/* --- IMPORT --- */
+.import-modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.35);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  z-index:9999;
+}
+.import-modal.open{display:flex;}
+.import-box{
+  width:min(980px,96vw);
+  max-height:90vh;
+  background:#fff;
+  border:1px solid #999;
+  border-radius:12px;
+  box-shadow:0 14px 36px rgba(0,0,0,.25);
+  padding:16px;
+  box-sizing:border-box;
+}
+.import-box h3{
+  margin:0 0 10px 0;
+  font-size:15pt;
+}
+.import-help{
+  margin:0 0 8px 0;
+  font-size:10.8pt;
+  color:#555;
+}
+#importText{
+  width:100%;
+  height:42vh;
+  resize:vertical;
+  box-sizing:border-box;
+  font:12pt/1.35 Consolas, "Courier New", monospace;
+  padding:10px;
+  border:1px solid #999;
+  border-radius:8px;
+}
+.import-actions{
+  margin-top:10px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+
+/* ===== Terra vzhled ===== */
+@page {
+  size:A4;
+  margin:12mm 18mm 14mm 18mm;
+}
+body{
+  font-family:"Times New Roman", Times, serif;
+  font-size:11.3pt;
+  line-height:1.12;
+}
+.page{
+  width:172mm;
+}
+.top{
+  display:block;
+  margin-top:1mm;
+  text-align:center;
+}
+.logo{
+  width:88mm;
+  height:auto;
+  object-fit:contain;
+  display:block;
+  margin:0 auto 4mm auto;
+}
+.titleWrap{display:none;}
+.content{margin-top:1mm;}
+.day{margin:0 0 0.8mm 0;}
+.dayName{margin:0;}
+.terra-menu{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+  margin:0;
+}
+.terra-menu td{
+  padding:0.7mm 1.2mm;
+  vertical-align:middle;
+  border:none;
+}
+.terra-menu .label{
+  width:24mm;
+  white-space:nowrap;
+}
+.terra-menu .text{
+  width:auto;
+  padding-right:1.5mm;
+}
+.terra-menu .price{
+  width:24mm;
+  white-space:nowrap;
+  text-align:right;
+}
+.terra-menu .dayHead td{
+  background:#e9e9e9;
+  font-weight:700;
+  padding-top:0.55mm;
+  padding-bottom:0.55mm;
+}
+.terra-menu .dayHead .price{ text-align:center; }
+.terra-menu .alg{ display:none; }
+.terra-menu tr.soup td.label,
+.terra-menu tr.item td.label,
+.terra-menu tr.pizza td.label{font-weight:400;}
+.foot{
+  margin-top:5mm;
+  text-align:center;
+  color:#222;
+  font-size:10.9pt;
+}
+.salads{
+  margin-top:2mm;
+  text-align:center;
+}
+.saladsTitle{
+  font-size:30pt;
+  line-height:1;
+  margin:4.5mm 0 3mm 0;
+  font-weight:400;
+}
+.salads table{
+  margin:0 auto;
+  border-collapse:collapse;
+  width:70%;
+}
+.salads td{
+  padding:0.7mm 0;
+  font-family:Arial, Helvetica, sans-serif;
+  font-size:10.5pt;
+}
+.salads .bullet{
+  width:8mm;
+  text-align:center;
+}
+.salads .saladText{
+  text-align:left;
+  padding-right:3mm;
+}
+.salads .saladPrice{
+  width:24mm;
+  text-align:left;
+  white-space:nowrap;
+}
+.pay{display:none !important;}
+#payToolbar{display:none !important;}
+.hiddenMeta{display:none;}
+@media screen and (max-width:700px){
+  body{font-size:11pt;}
+  .logo{width:min(84vw,88mm);}
+  .terra-menu{
+    table-layout:fixed;
+    width:100%;
+  }
+  .terra-menu td{
+    padding:0.45mm 0.35mm;
+    box-sizing:border-box;
+    vertical-align:top;
+  }
+  .terra-menu .label{
+    width:24.6mm;
+    min-width:24.6mm;
+    max-width:24.6mm;
+    font-size:9.2pt;
+    line-height:1.03;
+    white-space:nowrap;
+    padding-right:0.9mm;
+    overflow:hidden;
+    text-overflow:clip;
+  }
+  .terra-menu .text{
+    width:auto;
+    padding-left:0.55mm;
+    padding-right:0.6mm;
+    overflow-wrap:anywhere;
+    word-break:normal;
+  }
+  .terra-menu .price{
+    width:15mm;
+    min-width:15mm;
+    max-width:15mm;
+    white-space:nowrap;
+    text-align:right;
+    font-size:9.8pt;
+  }
+  .terra-menu .dayHead .label{
+    width:24.6mm;
+    min-width:24.6mm;
+    max-width:24.6mm;
+    font-size:10.2pt;
+    padding-right:0.9mm;
+  }
+  .terra-menu .dayHead .text{
+    padding-left:0.55mm;
+  }
+  .salads table{width:64%;}
+  .salads .saladText{padding-right:2mm;}
+  .salads .saladPrice{width:19mm;}
+  .saladsTitle{font-size:22pt;}
+}
+
+
+@media print{
+  .terra-menu .price,
+  table.menu td.price{
+    width:18mm !important;
+    padding-right:0 !important;
+    position:relative;
+    left:-1.5mm;
+  }
+}
+
+@media print{
+  @page { margin:7mm 15mm 10mm 15mm; } /* menší horní okraj pro tisk */
+  .top{ margin-top:0mm !important; }  /* celý obsah mírně nahoru */
+}
+
+@media print and (max-width:700px){
+  .terra-menu td{
+    box-sizing:border-box;
+    vertical-align:top;
+  }
+  .terra-menu .label,
+  .terra-menu .dayHead .label{
+    width:31mm !important;
+    min-width:31mm !important;
+    max-width:31mm !important;
+    white-space:nowrap !important;
+    padding-right:2.2mm !important;
+    overflow:hidden !important;
+  }
+  .terra-menu .text,
+  .terra-menu .dayHead .text{
+    padding-left:1.3mm !important;
+  }
+}
+
+@media print{
+  body.mobile-print .terra-menu td{
+    box-sizing:border-box;
+    vertical-align:top;
+  }
+  body.mobile-print .terra-menu .label,
+  body.mobile-print .terra-menu .dayHead .label{
+    width:27.8mm !important;
+    min-width:27.8mm !important;
+    max-width:27.8mm !important;
+    white-space:nowrap !important;
+    padding-right:0.8mm !important;
+    overflow:visible !important;
+    font-size:9.2pt !important;
+    line-height:1.02 !important;
+  }
+  body.mobile-print .terra-menu .text,
+  body.mobile-print .terra-menu .dayHead .text{
+    padding-left:0.15mm !important;
+  }
+  body.mobile-print .terra-menu .price,
+  body.mobile-print table.menu td.price{
+    width:17mm !important;
+    min-width:17mm !important;
+    max-width:17mm !important;
+    left:-0.8mm !important;
+    font-size:9.6pt !important;
+  }
+}
+
+
+@media print{
+  td.num, td.price{
+    font-size:12.2pt !important;
+    line-height:1.25 !important;
+  }
+}
+</style>
+<!-- Export jako obrázek -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script>
+function detectMobilePrintMode(){
+  const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+  const narrow = Math.min(window.innerWidth || 9999, screen.width || 9999) <= 900;
+  const touch = ('ontouchstart' in window) || (navigator.maxTouchPoints || 0) > 0;
+  const mobileUA = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
+  const mobile = mobileUA || (touch && (coarse || narrow));
+  document.body.classList.toggle('mobile-print', !!mobile);
+}
+window.addEventListener('load', detectMobilePrintMode);
+window.addEventListener('resize', detectMobilePrintMode);
+window.addEventListener('beforeprint', detectMobilePrintMode);
+
+let exportDirHandle = null;
+
+function getPrintMarginsMM(){
+  const cs = getComputedStyle(document.documentElement);
+  const read = (name, fallback) => {
+    const raw = (cs.getPropertyValue(name) || '').trim();
+    const n = parseFloat(raw);
+    return Number.isFinite(n) ? n : fallback;
+  };
+  return {
+    top: read('--print-margin-top', 7),
+    right: read('--print-margin-right', 15),
+    bottom: read('--print-margin-bottom', 10),
+    left: read('--print-margin-left', 15)
+  };
+}
+
+function applyPaddingFromMargins(el, margins){
+  el.style.padding =
+    margins.top + "mm " + margins.right + "mm " + margins.bottom + "mm " + margins.left + "mm";
+}
+
+
+function getFirstMenuDate(){
+  const dr=document.getElementById("dateRange");
+  if(!dr) return "datum";
+  const t=dr.innerText.trim();
+  const m=t.match(/(\d{1,2})\.(\d{1,2})\.?\s*[–-]\s*\d{1,2}\.\d{1,2}\.\s*(\d{4})/);
+  if(m){
+    return m[1]+"."+m[2]+"."+m[3];
+  }
+  const m2=t.match(/(\d{1,2}\.\d{1,2}\.\d{4})/);
+  if(m2) return m2[1];
+  return "datum";
+}
+
+function getMenuDateCode(){
+  const el = document.getElementById("dateRange");
+  if(!el) return "menu";
+  const t = el.innerText.trim();
+  const m = t.match(/(\d{1,2})\.(\d{1,2})\.\s*–.*?(\d{4})/);
+  if(!m) return "menu";
+  const d = ("0"+m[1]).slice(-2);
+  const mo = ("0"+m[2]).slice(-2);
+  const y = m[3].slice(-2);
+  return y+mo+d;
+}
+
+function updateExportFolderInfo(name){
+  const el = document.getElementById("exportFolderInfo");
+  if(!el) return;
+  const span = el.querySelector(".path");
+  if(span) span.textContent = name || "nevybrána";
+}
+
+function fsApiSupported(){
+  return ("showDirectoryPicker" in window) &&
+         window.isSecureContext &&
+         !!window.indexedDB;
+}
+
+function openExportDb(){
+  return new Promise((resolve, reject)=>{
+    const req = indexedDB.open("jidelnaky-export-db", 1);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if(!db.objectStoreNames.contains("handles")){
+        db.createObjectStore("handles");
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbSet(key, value){
+  const db = await openExportDb();
+  return new Promise((resolve, reject)=>{
+    const tx = db.transaction("handles", "readwrite");
+    tx.objectStore("handles").put(value, key);
+    tx.oncomplete = () => { db.close(); resolve(true); };
+    tx.onerror = () => { db.close(); reject(tx.error); };
+  });
+}
+
+async function idbGet(key){
+  const db = await openExportDb();
+  return new Promise((resolve, reject)=>{
+    const tx = db.transaction("handles", "readonly");
+    const req = tx.objectStore("handles").get(key);
+    req.onsuccess = () => { db.close(); resolve(req.result || null); };
+    req.onerror = () => { db.close(); reject(req.error); };
+  });
+}
+
+async function persistExportDirectoryHandle(handle){
+  try{
+    await idbSet("exportDirHandle", handle);
+    return true;
+  }catch(err){
+    console.warn("Uložení handle do IndexedDB se nepodařilo:", err);
+    return false;
+  }
+}
+
+async function restoreExportDirectoryHandle(){
+  if(!fsApiSupported()) return false;
+  try{
+    const handle = await idbGet("exportDirHandle");
+    if(!handle) return false;
+    if(handle.kind !== "directory") return false;
+
+    let perm = "prompt";
+    try{
+      perm = await handle.queryPermission({ mode: "readwrite" });
+    }catch(err){}
+
+    exportDirHandle = handle;
+    updateExportFolderInfo(handle.name || "vybraná složka");
+
+    if(perm === "granted"){
+      return true;
+    }
+
+    updateExportFolderInfo((handle.name || "vybraná složka") + " (čeká na potvrzení práv)");
+    return true;
+  }catch(err){
+    console.warn("Obnovení handle ze storage se nepodařilo:", err);
+    return false;
+  }
+}
+
+async function pickExportDirectory(){
+  if(!("showDirectoryPicker" in window)){
+    alert("Tento prohlížeč nepodporuje výběr složky exportu. Ve Firefoxu to nefunguje. V Chrome / Edge ano.");
+    return false;
+  }
+  if(!window.isSecureContext){
+    alert("Výběr složky funguje jen v zabezpečeném kontextu. Otevři soubor přes místní server nebo v prostředí, kde Chrome toto API povolí.");
+    return false;
+  }
+  try{
+    const dirHandle = await window.showDirectoryPicker({
+      id: "jidelnaky-export",
+      mode: "readwrite"
+    });
+    const perm = await dirHandle.requestPermission({ mode: "readwrite" });
+    if(perm !== "granted"){
+      alert("Nebyla udělena práva pro zápis do složky.");
+      return false;
+    }
+    exportDirHandle = dirHandle;
+    updateExportFolderInfo(dirHandle.name || "vybraná složka");
+    await persistExportDirectoryHandle(dirHandle);
+    return true;
+  }catch(err){
+    if(err && err.name !== "AbortError"){
+      alert("Výběr složky se nepodařil: " + err.message);
+    }
+    return false;
+  }
+}
+
+async function ensureWritePermission(){
+  if(!exportDirHandle) return false;
+  try{
+    let perm = await exportDirHandle.queryPermission({ mode: "readwrite" });
+    if(perm !== "granted"){
+      perm = await exportDirHandle.requestPermission({ mode: "readwrite" });
+    }
+    return perm === "granted";
+  }catch(err){
+    console.warn("Permission check selhal:", err);
+    return false;
+  }
+}
+
+async function writeBlobToPickedDirectory(filename, blob){
+  if(!exportDirHandle) return false;
+  try{
+    const ok = await ensureWritePermission();
+    if(!ok) return false;
+
+    const fileHandle = await exportDirHandle.getFileHandle(filename, { create: true });
+    const writable = await fileHandle.createWritable();
+    await writable.write(blob);
+    await writable.close();
+    return true;
+  }catch(err){
+    console.warn("Zápis do vybrané složky selhal:", err);
+    alert("Zápis do vybrané složky se nepodařil: " + err.message);
+    return false;
+  }
+}
+
+function fallbackDownloadBlob(filename, blob){
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{
+    URL.revokeObjectURL(a.href);
+    a.remove();
+  }, 700);
+}
+
+async function saveBlobSmart(filename, blob){
+  const ok = await writeBlobToPickedDirectory(filename, blob);
+  if(!ok){
+    fallbackDownloadBlob(filename, blob);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", async ()=>{
+  const btn = document.getElementById("btnPickExportDir");
+  if(btn){
+    btn.addEventListener("click", async ()=>{
+      await pickExportDirectory();
+    });
+  }
+
+  if(fsApiSupported()){
+    await restoreExportDirectoryHandle();
+    if(!exportDirHandle){
+      updateExportFolderInfo("nevybrána");
+    }
+  }else{
+    updateExportFolderInfo("nepodporováno v tomto režimu/prohlížeči");
+  }
+});
+</script>
+<style>
+@media screen{
+  .rowToolsWrap{
+    display:none;
+    gap:4px;
+    margin-left:6px;
+    vertical-align:middle;
+  }
+  body.editMode .rowToolsWrap{
+    display:inline-flex;
+    align-items:center;
+  }
+  .rowToolBtn{
+    appearance:none;
+    -webkit-appearance:none;
+    border:0;
+    background:transparent;
+    color:#666;
+    cursor:pointer;
+    font-size:12px;
+    line-height:1;
+    padding:0;
+    width:14px;
+    height:14px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+  }
+  .rowToolBtn:hover{ background:#ececec; color:#000; }
+  .rowToolBtn:focus{ outline:1px solid rgba(0,0,0,.35); outline-offset:1px; }
+}
+@media print{
+  .rowToolsWrap{display:none !important;}
+  .no-print{display:none !important;}
+}
+
+@media print{
+  @page { margin:7mm 15mm 10mm 15mm; } /* menší horní okraj pro tisk */
+  .top{ margin-top:0mm !important; }  /* celý obsah mírně nahoru */
+}
+
+@media print and (max-width:700px){
+  .terra-menu td{
+    box-sizing:border-box;
+    vertical-align:top;
+  }
+  .terra-menu .label,
+  .terra-menu .dayHead .label{
+    width:31mm !important;
+    min-width:31mm !important;
+    max-width:31mm !important;
+    white-space:nowrap !important;
+    padding-right:2.2mm !important;
+    overflow:hidden !important;
+  }
+  .terra-menu .text,
+  .terra-menu .dayHead .text{
+    padding-left:1.3mm !important;
+  }
+}
+
+@media print{
+  body.mobile-print .terra-menu td{
+    box-sizing:border-box;
+    vertical-align:top;
+  }
+  body.mobile-print .terra-menu .label,
+  body.mobile-print .terra-menu .dayHead .label{
+    width:27.8mm !important;
+    min-width:27.8mm !important;
+    max-width:27.8mm !important;
+    white-space:nowrap !important;
+    padding-right:0.8mm !important;
+    overflow:visible !important;
+    font-size:9.2pt !important;
+    line-height:1.02 !important;
+  }
+  body.mobile-print .terra-menu .text,
+  body.mobile-print .terra-menu .dayHead .text{
+    padding-left:0.15mm !important;
+  }
+  body.mobile-print .terra-menu .price,
+  body.mobile-print table.menu td.price{
+    width:17mm !important;
+    min-width:17mm !important;
+    max-width:17mm !important;
+    left:-0.8mm !important;
+    font-size:9.6pt !important;
+  }
+}
+
+
+@media print{
+  td.num, td.price{
+    font-size:12.2pt !important;
+    line-height:1.25 !important;
+  }
+}
+</style>
+<style>
+:root{
+  --print-margin-top:7mm;
+  --print-margin-right:15mm;
+  --print-margin-bottom:10mm;
+  --print-margin-left:15mm;
+}
+.page{
+  width:calc(210mm - var(--print-margin-left) - var(--print-margin-right)) !important;
+}
+@media print{
+  .page{
+    width:calc(210mm - var(--print-margin-left) - var(--print-margin-right)) !important;
+    margin:var(--print-margin-top) var(--print-margin-right) var(--print-margin-bottom) var(--print-margin-left) !important;
+  }
+}
+@page{
+  margin:var(--print-margin-top) var(--print-margin-right) var(--print-margin-bottom) var(--print-margin-left) !important;
+}
+@media print{
+  @page{
+    margin:var(--print-margin-top) var(--print-margin-right) var(--print-margin-bottom) var(--print-margin-left) !important;
+  }
+}
+
+@media print{
+  td.num, td.price{
+    font-size:12.2pt !important;
+    line-height:1.25 !important;
+  }
+}
+</style>
+
+
+<style id="v18-print-fix">
+@media print{
+  .terra-menu .label{
+    width:24mm !important;
+    min-width:24mm !important;
+    max-width:24mm !important;
+    font-size:11.3pt !important;
+    line-height:1.12 !important;
+    white-space:nowrap !important;
+    padding-right:2mm !important;
+  }
+  .terra-menu .dayHead .label{
+    width:24mm !important;
+    min-width:24mm !important;
+    max-width:24mm !important;
+    font-size:11.3pt !important;
+    line-height:1.12 !important;
+    white-space:nowrap !important;
+    padding-right:2mm !important;
+  }
+  .terra-menu .text,
+  .terra-menu .dayHead .text{
+    padding-left:0.35mm !important;
+  }
+}
+
+@media print{
+  body.mobile-print .terra-menu .label,
+  body.mobile-print .terra-menu .dayHead .label{
+    width:27.8mm !important;
+    min-width:27.8mm !important;
+    max-width:27.8mm !important;
+    padding-right:0.8mm !important;
+  }
+  body.mobile-print .terra-menu .text,
+  body.mobile-print .terra-menu .dayHead .text{
+    padding-left:0.15mm !important;
+  }
+}
+
+@media print{
+  td.num, td.price{
+    font-size:12.2pt !important;
+    line-height:1.25 !important;
+  }
+}
+</style>
+
+<style id="v21-print-fix">
+@media print{
+  /* sjednotit písmo v levém popisovém sloupci i ve sloupci Cena při tisku */
+  .terra-menu td.label,
+  .terra-menu tr.soup td.label,
+  .terra-menu tr.item td.label,
+  .terra-menu tr.pizza td.label,
+  .terra-menu .price,
+  table.menu td.price{
+    font-size:11.3pt !important;
+    line-height:1.12 !important;
+  }
+
+  /* i v hlavičce dne držet stejnou velikost jako zbytek tabulky */
+  .terra-menu .dayHead td.label,
+  .terra-menu .dayHead td.price{
+    font-size:11.3pt !important;
+    line-height:1.12 !important;
+  }
+}
+</style>
+
+
+<style id="v26-price-fix">
+@media print{
+  .terra-menu td.price,
+  .terra-menu td.price *{
+    font-size:11.3pt !important;
+    line-height:1.12 !important;
+  }
+}
+</style>
+
+</head>
+<body class="">
+<div class="page" id="menuPage">
+<header class="top">
+<img alt="Pizzeria Terra logo" class="logo" src="data:image/png;base64,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"/>
+<div class="hiddenMeta">
+<span contenteditable="true" id="dateRange">9.3. – 11.3. 2026</span>
+<p class="pay" contenteditable="true">restaurant &amp; coffee</p>
+</div>
+</header>
+<main class="content">
+<section class="day">
+<table class="menu terra-menu">
+<tbody>
+<tr class="dayHead"><td class="label dayName editable">Pondělí</td><td class="text"><span class="dayDate editable" data-day-offset="0">9.3.2026</span></td><td class="price">Cena</td></tr>
+<tr class="soup"><td class="label editable">Polévka</td><td class="text editable">Frankfurtská polévka</td><td class="price editable">49,-Kč</td></tr>
+<tr class="item"><td class="label editable">Hlavní jídlo 1</td><td class="text editable">Pečené kuřecí stehno, dušená rýže 159,-Kč Hamburger se smaženým sýrem, hranolkami a naší tatarskou omáčkou</td><td class="price editable">159,-Kč</td></tr>
+<tr class="item"><td class="label editable">Hlavní jídlo 2</td><td class="text editable">Zapečené chalupářské těstoviny, ster. okurky 149,-Kč Plněná pašerákova kapsa s bramborovou kaší a jemným sosem</td><td class="price editable">159,-Kč</td></tr>
+<tr class="item"><td class="label editable">Hlavní jídlo 3</td><td class="text editable">Italské těstoviny Tarhoně s ragú z mletého masa a sýrem 159,-Kč Kuřecí nudličky ,,Terezka,, pečené brambory nebo dušená rýže</td><td class="price editable">159,-Kč</td></tr>
+<tr class="item"><td class="label editable">Hlavní jídlo 4</td><td class="text editable">Smažený sýr nebo hermelín, hranolky, tatarka</td><td class="price editable">159,-Kč</td></tr>
+<tr class="item"><td class="label editable">Hlavní jídlo 5</td><td class="text editable">Smažený kuřecí nebo vepřový řízek, hranolky, tatarka</td><td class="price editable">159,-Kč</td></tr>
+<tr class="pizza"><td class="label editable">Pizza</td><td class="text editable">Dle jídelního lístku</td><td class="price editable">169,-Kč</td></tr>
+</tbody>
+</table>
+</section>
+<section class="day">
+<table class="menu terra-menu">
+<tbody>
+<tr class="dayHead"><td class="label dayName editable">Úterý</td><td class="text"><span class="dayDate editable" data-day-offset="1">10.3.2026</span></td><td class="price">Cena</td></tr>
+<tr class="soup"><td class="label editable">Polévka</td><td class="text editable">Zeleninová jarní polévka</td><td class="price editable">49,-Kč</td></tr>
+<tr class="item"><td class="label editable">Hlavní jídlo 1</td><td class="text editable">Fit jídlo: Luštěninové rizoto s kuřecím masíčkem, zeleninovým salátem a jogurtovým dipem</td><td class="price editable">159,-Kč</td></tr>
+<tr class="item"><td class="label editable">Hlavní jídlo 2</td><td class="text editable">Mletý kebab šiš s pečenými brambory s cibulkou, nivový dip, salátek</td><td class="price editable">159,-Kč</td></tr>
+<tr class="item"><td class="label editable">Hlavní jídlo 3</td><td class="text editable">Italské těstoviny s malými makrelkami na bílém víně s bazalkovou omáčkou a parmezánem</td><td class="price editable">169,-Kč</td></tr>
+<tr class="item"><td class="label editable">Hlavní jídlo 4</td><td class="text editable">Smažený kuřecí nebo vepřový řízek, hranolky, tatarka</td><td class="price editable">159,-Kč</td></tr>
+<tr class="item"><td class="label editable">Hlavní jídlo 5</td><td class="text editable">Smažený sýr nebo hermelín, hranolky, tatarka</td><td class="price editable">159,-Kč</td></tr>
+<tr class="pizza"><td class="label editable">Pizza</td><td class="text editable">Dle jídelního lístku</td><td class="price editable">169,-Kč</td></tr>
+</tbody>
+</table>
+</section>
+<section class="day">
+<table class="menu terra-menu">
+<tbody>
+<tr class="dayHead"><td class="label dayName editable">Středa</td><td class="text"><span class="dayDate editable" data-day-offset="2">11.3.2026</span></td><td class="price">Cena</td></tr>
+<tr class="soup"><td class="label editable">Polévka</td><td class="text editable">Hovězí vývar s játrovými knedlíčky</td><td class="price editable">49,-Kč</td></tr>
+<tr class="item"><td class="label editable">Hlavní jídlo 1</td><td class="text editable">Hovězí maso v koprové omáčce s kynutým knedlíkem</td><td class="price editable">159,-Kč</td></tr>
+<tr class="item"><td class="label editable">Hlavní jídlo 2</td><td class="text editable">Italské risotto s filírovanou vepřovou panenkou v parmezánové omáčce, sýr</td><td class="price editable">159,-Kč</td></tr>
+<tr class="item"><td class="label editable">Hlavní jídlo 3</td><td class="text editable">Cizrnová kaše s uzeným masem, vařené vejce, kyselá okurka, naše bagetka</td><td class="price editable">159,-Kč</td></tr>
+<tr class="item"><td class="label editable">Hlavní jídlo 4</td><td class="text editable">Smažený sýr nebo hermelín, hranolky, tatarka</td><td class="price editable">159,-Kč</td></tr>
+<tr class="item"><td class="label editable">Hlavní jídlo 5</td><td class="text editable">Smažený kuřecí nebo vepřový řízek, hranolky, tatarka</td><td class="price editable">159,-Kč</td></tr>
+<tr class="pizza"><td class="label editable">Pizza</td><td class="text editable">Dle jídelního lístku</td><td class="price editable">169,-Kč</td></tr>
+</tbody>
+</table>
+</section>
+<div class="foot editable">Nabídka platí v době obědů (11:00-14:00).</div>
+<section class="salads">
+<h2 class="saladsTitle editable">....Saláty....</h2>
+<table>
+<tbody>
+<tr><td class="bullet editable">-</td><td class="saladText editable">s grilovanou vepřovou panenkou (150g)</td><td class="saladPrice editable">159,- Kč</td></tr>
+<tr><td class="bullet editable">-</td><td class="saladText editable">s grilovaným kuřecím masem (150g)</td><td class="saladPrice editable">159,- Kč</td></tr>
+<tr><td class="bullet editable">-</td><td class="saladText editable">Caesar s kuřecím masem (150g)</td><td class="saladPrice editable">159,- Kč</td></tr>
+<tr><td class="bullet editable">-</td><td class="saladText editable">Caesar s grilovanou vepřovou panenkou (150g)</td><td class="saladPrice editable">159,- Kč</td></tr>
+<tr><td class="bullet editable">-</td><td class="saladText editable">se smaženým sýrem (120g)</td><td class="saladPrice editable">159,- Kč</td></tr>
+<tr><td class="bullet editable">-</td><td class="saladText editable">se smaženým hermelínem (100g)</td><td class="saladPrice editable">159,- Kč</td></tr>
+<tr><td class="bullet editable">-</td><td class="saladText editable">s grilovaným lososem (150g)</td><td class="saladPrice editable">169,- Kč</td></tr>
+<tr><td class="bullet editable">-</td><td class="saladText editable">s krevetami na bílém víně a česneku (8ks)</td><td class="saladPrice editable">169,- Kč</td></tr>
+</tbody>
+</table>
+</section>
+<div class="no-print" id="payToolbar" style="display:none; margin-top:8px; text-align:center;">
+<div style="display:inline-flex; gap:8px; align-items:center; flex-wrap:wrap; border:1px solid #333; border-radius:8px; background:#f3f3f3; padding:6px 10px;">
+<span style="font-size:10.5pt;">Formát NADPISU:</span>
+<label style="font-size:10.5pt;">Barva <input id="payColor" style="vertical-align:middle;" type="color" value="#d40000"/></label>
+<button class="btn" id="payNormal" type="button">Normální</button>
+<button class="btn" id="payBold" type="button"><b>B</b></button>
+<button class="btn" id="payItalic" type="button"><i>I</i></button>
+<button class="btn" id="payUnderline" type="button"><u>U</u></button>
+</div>
+</div>
+
+<div class="no-print" id="editorToolbar" style="display:none; margin-top:8px; text-align:center;">
+<div style="display:inline-flex; gap:8px; align-items:center; justify-content:center; flex-wrap:wrap; border:1px solid #333; border-radius:8px; background:#f3f3f3; padding:6px 10px;">
+<span style="font-size:10.5pt;">Editor:</span>
+<button class="btn" id="editorDecreaseFont" title="Zmenšit písmo výběru" type="button"><span style="font-size:11pt;">A</span></button>
+<button class="btn" id="editorIncreaseFont" title="Zvětšit písmo výběru" type="button"><span style="font-size:18pt; line-height:1;">A</span></button>
+<label style="font-size:10.5pt;">Barva <input id="editorColor" style="vertical-align:middle;" type="color" value="#000000"/></label>
+<button class="btn" id="editorBold" type="button"><b>B</b></button>
+<button class="btn" id="editorItalic" type="button"><i>I</i></button>
+<button class="btn" id="editorUnderline" type="button"><u>U</u></button>
+<button class="btn" id="editorClearFormat" type="button">Reset formátu</button>
+</div>
+</div>
+
+<div class="no-print export-exclude" id="marginToolbar" style="margin-top:8px; text-align:center;">
+<div style="display:inline-flex; gap:8px; align-items:center; justify-content:center; flex-wrap:wrap; border:1px solid #333; border-radius:8px; background:#f3f3f3; padding:6px 10px;">
+<span style="font-size:10.5pt;">Okraje tisku:</span>
+<label style="font-size:10.5pt;">H <input id="marginTopInput" min="0" step="1" style="width:58px;" type="number" value="7"/> mm</label>
+<label style="font-size:10.5pt;">P <input id="marginRightInput" min="0" step="1" style="width:58px;" type="number" value="15"/> mm</label>
+<label style="font-size:10.5pt;">D <input id="marginBottomInput" min="0" step="1" style="width:58px;" type="number" value="10"/> mm</label>
+<label style="font-size:10.5pt;">L <input id="marginLeftInput" min="0" step="1" style="width:58px;" type="number" value="15"/> mm</label>
+<button class="btn" id="btnMarginReset" type="button">Výchozí okraje</button>
+</div>
+</div>
+
+<div class="controls">
+<button class="btn" id="btnImport" onclick="window.openImportModal &amp;&amp; window.openImportModal()" type="button">Import</button>
+<button class="btn" onclick="window.print()">Tisk</button>
+<button class="btn" onclick="exportJPG()">Export JPG</button>
+<button class="btn" id="btnPdf" type="button">Export PDF</button>
+<button class="btn" id="btnPdf2x" type="button">Export PDF 2×A4</button>
+<button class="btn" id="btnPrint2x" title="Vytiskne 2× jídelák na jednu A4 (na šířku)" type="button">Tisk 2× na A4</button>
+<button class="btn" id="btnEdit" type="button">Editace</button>
+<button class="btn" id="btnSave" type="button">Uložit HTML</button>
+<button class="btn" id="btnPickExportDir" type="button">Vybrat složku exportu</button>
+<button class="btn" id="btnUndoEdit" title="Zpět" type="button">↶</button>
+<button class="btn" id="btnRedoEdit" title="Znovu" type="button">↷</button>
+</div>
+</main>
+</div>
+<div class="export-bar no-print" id="exportFolderInfo">Složka exportu: <span class="path">nevybrána</span></div>
+<script>
+function formatStart(d){ return d.getDate()+'.'+(d.getMonth()+1)+'.'; }
+function formatEnd(d){ return d.getDate()+'.'+(d.getMonth()+1)+'. '+d.getFullYear(); }
+
+function nextMonday(){
+  let d=new Date();
+  let day=d.getDay(); // 0=Ne..6=So
+  let diff=(8-day)%7;
+  if(diff===0) diff=7; // když je pondělí, vezmi až další pondělí
+  d.setDate(d.getDate()+diff);
+  return d;
+}
+
+function fillNextWeek(){
+  let mon=nextMonday();
+  let fri=new Date(mon);
+  fri.setDate(mon.getDate()+4);
+  document.getElementById("dateRange").innerText = formatStart(mon)+" – "+formatEnd(fri);
+}
+
+
+
+function getFirstMenuDate(){
+  const dr=document.getElementById("dateRange");
+  if(!dr) return "datum";
+  const t=dr.innerText.trim();
+  const m=t.match(/(\d{1,2})\.(\d{1,2})\.?\s*[–-]\s*\d{1,2}\.\d{1,2}\.\s*(\d{4})/);
+  if(m){
+    return m[1]+"."+m[2]+"."+m[3];
+  }
+  const m2=t.match(/(\d{1,2}\.\d{1,2}\.\d{4})/);
+  if(m2) return m2[1];
+  return "datum";
+}
+
+function getMenuDateCode(){
+  const el = document.getElementById("dateRange");
+  if(!el) return "menu";
+  const t = el.innerText.trim();
+  // očekává formát: 2.3. – 6.3. 2026
+  const m = t.match(/(\d{1,2})\.(\d{1,2})\.\s*–.*?(\d{4})/);
+  if(!m) return "menu";
+  const d = ("0"+m[1]).slice(-2);
+  const mo = ("0"+m[2]).slice(-2);
+  const y = m[3].slice(-2);
+  return y+mo+d; // YYMMDD
+}
+
+
+async function exportJPG(){
+  const el = document.getElementById("menuPage");
+
+  const mmToPx = (mm) => mm * 96 / 25.4;
+  const wrap = document.createElement("div");
+  wrap.style.position = "fixed";
+  wrap.style.left = "-100000px";
+  wrap.style.top = "0";
+  wrap.style.width = mmToPx(210) + "px";
+  wrap.style.boxSizing = "border-box";
+  wrap.style.background = "#fff";
+  const margins = getPrintMarginsMM();
+  wrap.style.padding =
+    mmToPx(margins.top) + "px " + mmToPx(margins.right) + "px " + mmToPx(margins.bottom) + "px " + mmToPx(margins.left) + "px";
+
+  const clone = el.cloneNode(true);
+  clone.querySelectorAll('.controls, .no-print, .export-exclude, #exportFolderInfo').forEach(node => node.remove());
+  clone.querySelectorAll('[id]').forEach(el2 => el2.removeAttribute('id'));
+  clone.style.margin = "0";
+
+  wrap.appendChild(clone);
+  document.body.appendChild(wrap);
+
+  const canvas = await html2canvas(wrap, { backgroundColor: "#fff", scale: 3, useCORS: true });
+  document.body.removeChild(wrap);
+
+  const code = getMenuDateCode();
+  const filename = "denni_menu_Terra_" + code + ".jpg";
+
+  const blob = await new Promise((resolve) => {
+    canvas.toBlob((b) => resolve(b), "image/jpeg", 0.95);
+  });
+
+  if(!blob){
+    alert("Nepodařilo se vytvořit JPG export.");
+    return;
+  }
+
+  await saveBlobSmart(filename, blob);
+}
+
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+
+  function buildSingleExportWrap(){
+    const el = document.getElementById("menuPage");
+    const mmToPx = (mm) => mm * 96 / 25.4;
+
+    const wrap = document.createElement("div");
+    wrap.style.position = "fixed";
+    wrap.style.left = "-100000px";
+    wrap.style.top = "0";
+    wrap.style.width = mmToPx(210) + "px";
+    wrap.style.height = mmToPx(297) + "px";
+    wrap.style.boxSizing = "border-box";
+    wrap.style.background = "#fff";
+    const margins = getPrintMarginsMM();
+    wrap.style.padding =
+      mmToPx(margins.top) + "px " + mmToPx(margins.right) + "px " + mmToPx(margins.bottom) + "px " + mmToPx(margins.left) + "px";
+    wrap.style.overflow = "hidden";
+
+    const clone = el.cloneNode(true);
+    clone.querySelectorAll('.controls, .no-print, .export-exclude, #exportFolderInfo').forEach(node => node.remove());
+    clone.querySelectorAll('[id]').forEach(el2 => el2.removeAttribute('id'));
+    clone.style.margin = "0";
+
+    wrap.appendChild(clone);
+    document.body.appendChild(wrap);
+    return wrap;
+  }
+
+  function makePrint2xCopy(page){
+    const paper = document.createElement('div');
+    paper.className = 'virtualPaper';
+
+    const clone = page.cloneNode(true);
+    clone.querySelectorAll('.controls, .no-print, .export-exclude, #exportFolderInfo').forEach(node => node.remove());
+
+    clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+    clone.style.margin = '0';
+
+    paper.appendChild(clone);
+    return paper;
+  }
+
+  function buildPrint2xWrap(mode){
+    mode = mode || 'print';
+    const page = document.getElementById('menuPage') || document.querySelector('.page') || document.body;
+
+    const old = document.getElementById('print2xWrap');
+    if(old) old.remove();
+
+    const wrap = document.createElement('div');
+    wrap.id = 'print2xWrap';
+    wrap.style.position = 'fixed';
+    wrap.style.left = '0';
+    wrap.style.top = '0';
+    wrap.style.width = '297mm';
+    wrap.style.height = '210mm';
+    wrap.style.background = '#fff';
+    wrap.style.boxSizing = 'border-box';
+    wrap.style.overflow = 'hidden';
+    wrap.style.zIndex = '99999';
+
+    const c1 = document.createElement('div');
+    c1.className = 'copy first';
+    c1.style.position = 'absolute';
+    c1.style.left = '0';
+    c1.style.top = '0';
+    c1.style.width = '148.5mm';
+    c1.style.height = '210mm';
+    c1.style.overflow = 'hidden';
+
+    const c2 = document.createElement('div');
+    c2.className = 'copy second';
+    c2.style.position = 'absolute';
+    c2.style.left = '148.5mm';
+    c2.style.top = '0';
+    c2.style.width = '148.5mm';
+    c2.style.height = '210mm';
+    c2.style.overflow = 'hidden';
+
+    const p1 = makePrint2xCopy(page);
+    p1.style.width = '210mm';
+    p1.style.height = '297mm';
+    const margins = getPrintMarginsMM();
+    p1.style.padding = margins.top + 'mm ' + margins.right + 'mm ' + margins.bottom + 'mm ' + margins.left + 'mm';
+    p1.style.boxSizing = 'border-box';
+    p1.style.background = '#fff';
+    const xShift = (mode === 'pdf') ? '0.8mm' : '1.0mm';
+    const scale2x = (mode === 'pdf') ? '0.692' : '0.705';
+    p1.style.transform = 'translate(' + xShift + ',0.8mm) scale(' + scale2x + ')';
+    p1.style.transformOrigin = 'top left';
+    p1.style.fontSize = '1.14em';
+    p1.querySelectorAll('.terra-menu .label').forEach(el => {
+      el.style.width = '34mm';
+      el.style.whiteSpace = 'nowrap';
+      el.style.paddingRight = '2.2mm';
+    });
+    p1.querySelectorAll('.terra-menu .text').forEach(el => {
+      el.style.paddingLeft = '1.8mm';
+    });
+    p1.style.margin = '0';
+
+    const p2 = makePrint2xCopy(page);
+    p2.style.width = '210mm';
+    p2.style.height = '297mm';
+    p2.style.padding = margins.top + 'mm ' + margins.right + 'mm ' + margins.bottom + 'mm ' + margins.left + 'mm';
+    p2.style.boxSizing = 'border-box';
+    p2.style.background = '#fff';
+    p2.style.transform = 'translate(' + xShift + ',0.8mm) scale(' + scale2x + ')';
+    p2.style.transformOrigin = 'top left';
+    p2.style.fontSize = '1.14em';
+    p2.querySelectorAll('.terra-menu .label').forEach(el => {
+      el.style.width = '34mm';
+      el.style.whiteSpace = 'nowrap';
+      el.style.paddingRight = '2.2mm';
+    });
+    p2.querySelectorAll('.terra-menu .text').forEach(el => {
+      el.style.paddingLeft = '1.8mm';
+    });
+    p2.style.margin = '0';
+
+    c1.appendChild(p1);
+    c2.appendChild(p2);
+    wrap.appendChild(c1);
+    wrap.appendChild(c2);
+
+    document.body.appendChild(wrap);
+    return wrap;
+  }
+
+  function cleanupPrint2x(){
+    document.body.classList.remove('print2x');
+    const wrap = document.getElementById('print2xWrap');
+    if(wrap) wrap.remove();
+    const st = document.getElementById('print2xLandscape');
+    if(st) st.remove();
+  }
+
+  function openPrint2x(){
+    buildPrint2xWrap();
+    document.body.classList.add('print2x');
+
+    const styleId = 'print2xLandscape';
+    const prev = document.getElementById(styleId);
+    if(prev) prev.remove();
+
+    const s = document.createElement('style');
+    s.id = styleId;
+    s.textContent = '@page { size: A4 landscape; margin: 0; }';
+    document.head.appendChild(s);
+
+    window.print();
+    setTimeout(cleanupPrint2x, 500);
+  }
+
+  async function exportPDFSingle(){
+    const wrap = buildSingleExportWrap();
+    const canvas = await html2canvas(wrap, {
+      backgroundColor: "#fff",
+      scale: 3,
+      useCORS: true,
+      width: wrap.offsetWidth,
+      height: wrap.offsetHeight
+    });
+    wrap.remove();
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+    const pageW = 210;
+    const pageH = 297;
+    const imgRatio = canvas.width / canvas.height;
+    const pageRatio = pageW / pageH;
+
+    let outW, outH, x, y;
+    if(imgRatio > pageRatio){
+      outW = pageW;
+      outH = pageW / imgRatio;
+      x = 0;
+      y = (pageH - outH) / 2;
+    }else{
+      outH = pageH;
+      outW = pageH * imgRatio;
+      y = 0;
+      x = (pageW - outW) / 2;
+    }
+
+    pdf.addImage(imgData, 'JPEG', x, y, outW, outH);
+
+    const filename = "denni_menu_Terra_" + getMenuDateCode() + ".pdf";
+    const blob = pdf.output('blob');
+    await saveBlobSmart(filename, blob);
+  }
+
+  async function exportPDF2x(){
+    const wrap = buildPrint2xWrap('pdf');
+
+    const canvas = await html2canvas(wrap, {
+      backgroundColor: "#fff",
+      scale: 3,
+      useCORS: true,
+      width: wrap.offsetWidth,
+      height: wrap.offsetHeight
+    });
+
+    wrap.remove();
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+    const pageW = 297;
+    const pageH = 210;
+    const imgRatio = canvas.width / canvas.height;
+    const pageRatio = pageW / pageH;
+
+    let outW, outH, x, y;
+    if(imgRatio > pageRatio){
+      outW = pageW;
+      outH = pageW / imgRatio;
+      x = 0;
+      y = (pageH - outH) / 2;
+    }else{
+      outH = pageH;
+      outW = pageH * imgRatio;
+      y = 0;
+      x = (pageW - outW) / 2;
+    }
+
+    pdf.addImage(imgData, 'JPEG', x, y, outW, outH);
+
+    const filename = "denni_menu_Terra_" + getMenuDateCode() + "_2xA4.pdf";
+    const blob = pdf.output('blob');
+    await saveBlobSmart(filename, blob);
+  }
+
+  const btnPrint2x = document.getElementById('btnPrint2x');
+  if(btnPrint2x){
+    btnPrint2x.addEventListener('click', function(e){
+      e.preventDefault();
+      openPrint2x();
+    });
+  }
+
+  const btnPdf = document.getElementById('btnPdf');
+  if(btnPdf){
+    btnPdf.addEventListener('click', async function(e){
+      e.preventDefault();
+      await exportPDFSingle();
+    });
+  }
+
+  const btnPdf2x = document.getElementById('btnPdf2x');
+  if(btnPdf2x){
+    btnPdf2x.addEventListener('click', async function(e){
+      e.preventDefault();
+      await exportPDF2x();
+    });
+  }
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const $ = (sel, root=document)=>root.querySelector(sel);
+  const $$ = (sel, root=document)=>Array.from(root.querySelectorAll(sel));
+  let activeEditable = null;
+  let savedRange = null;
+
+  function normalizeColorForInput(value){
+    if(!value) return '';
+    const s = String(value).trim();
+    if(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(s)){
+      if(s.length === 4){
+        return '#' + s[1]+s[1]+s[2]+s[2]+s[3]+s[3];
+      }
+      return s;
+    }
+    const m = s.match(/rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i);
+    if(m){
+      return '#' + [m[1],m[2],m[3]].map(v=>('0'+parseInt(v,10).toString(16)).slice(-2)).join('');
+    }
+    return '';
+  }
+
+  function getPrintMarginsMM(){
+    const cs = getComputedStyle(document.documentElement);
+    const read = (name, fallback) => {
+      const raw = (cs.getPropertyValue(name) || '').trim();
+      const n = parseFloat(raw);
+      return Number.isFinite(n) ? n : fallback;
+    };
+    return {
+      top: read('--print-margin-top', 7),
+      right: read('--print-margin-right', 15),
+      bottom: read('--print-margin-bottom', 10),
+      left: read('--print-margin-left', 15)
+    };
+  }
+
+  function syncActiveEditorControls(){
+    const toolbar = $('#editorToolbar');
+    const colorInput = $('#editorColor');
+    const mt = $('#marginTopInput');
+    const mr = $('#marginRightInput');
+    const mb = $('#marginBottomInput');
+    const ml = $('#marginLeftInput');
+
+    if(toolbar){
+      toolbar.style.display = document.body.classList.contains('editMode') ? 'block' : 'none';
+    }
+    if(colorInput){
+      colorInput.value = normalizeColorForInput(activeEditable ? (activeEditable.style.color || '') : '') || '#000000';
+    }
+    const margins = getPrintMarginsMM();
+    if(mt) mt.value = margins.top;
+    if(mr) mr.value = margins.right;
+    if(mb) mb.value = margins.bottom;
+    if(ml) ml.value = margins.left;
+  }
+
+  function setPrintMarginsMM(top, right, bottom, left){
+    document.documentElement.style.setProperty('--print-margin-top', top + 'mm');
+    document.documentElement.style.setProperty('--print-margin-right', right + 'mm');
+    document.documentElement.style.setProperty('--print-margin-bottom', bottom + 'mm');
+    document.documentElement.style.setProperty('--print-margin-left', left + 'mm');
+    syncActiveEditorControls();
+  }
+
+  function saveCurrentSelection(){
+    const sel = window.getSelection();
+    if(!sel || !sel.rangeCount) return;
+    const range = sel.getRangeAt(0);
+    if(!activeEditable || !activeEditable.contains(range.commonAncestorContainer)) return;
+    savedRange = range.cloneRange();
+  }
+
+  function restoreCurrentSelection(){
+    if(!activeEditable) return null;
+    const sel = window.getSelection();
+    if(savedRange){
+      try{
+        sel.removeAllRanges();
+        sel.addRange(savedRange);
+        return savedRange;
+      }catch(err){}
+    }
+    activeEditable.focus();
+    return null;
+  }
+
+  function getSelectedTextRange(){
+    if(!activeEditable) return null;
+    const sel = window.getSelection();
+    if(!sel || !sel.rangeCount) return null;
+    const range = sel.getRangeAt(0);
+    if(!activeEditable.contains(range.commonAncestorContainer)) return null;
+    return range;
+  }
+
+  function wrapSelectionWithStyledSpan(styleObj){
+    if(!activeEditable) return false;
+    restoreCurrentSelection();
+    const range = getSelectedTextRange();
+    if(!range || range.collapsed) return false;
+
+    const span = document.createElement('span');
+    Object.entries(styleObj).forEach(([k,v]) => { if(v != null) span.style[k] = v; });
+
+    try{
+      const contents = range.extractContents();
+      span.appendChild(contents);
+      range.insertNode(span);
+
+      const sel = window.getSelection();
+      const newRange = document.createRange();
+      newRange.selectNodeContents(span);
+      sel.removeAllRanges();
+      sel.addRange(newRange);
+      savedRange = newRange.cloneRange();
+      activeEditable.focus();
+      return true;
+    }catch(err){
+      return false;
+    }
+  }
+
+  function applyCommandToSelection(command, value=null){
+    if(!activeEditable) return;
+    restoreCurrentSelection();
+    activeEditable.focus();
+    try{
+      document.execCommand('styleWithCSS', false, true);
+    }catch(err){}
+    try{
+      document.execCommand(command, false, value);
+    }catch(err){}
+    saveCurrentSelection();
+    syncActiveEditorControls();
+  }
+
+  function getSelectionContainerFontSize(){
+    const range = getSelectedTextRange();
+    if(range){
+      let node = range.startContainer.nodeType === 1 ? range.startContainer : range.startContainer.parentElement;
+      while(node && node !== activeEditable && node.nodeType === 1){
+        const fs = window.getComputedStyle(node).fontSize;
+        if(fs) return parseFloat(fs);
+        node = node.parentElement;
+      }
+    }
+    if(activeEditable){
+      const fs = window.getComputedStyle(activeEditable).fontSize;
+      const n = parseFloat(fs);
+      if(Number.isFinite(n)) return n;
+    }
+    return 16;
+  }
+
+  function changeSelectionFontSize(deltaPx){
+    if(!activeEditable) return;
+    restoreCurrentSelection();
+    const current = getSelectionContainerFontSize();
+    const next = Math.max(6, Math.round((current + deltaPx) * 10) / 10) + 'px';
+    if(!wrapSelectionWithStyledSpan({fontSize: next})){
+      activeEditable.style.fontSize = next;
+    }
+    saveCurrentSelection();
+    syncActiveEditorControls();
+  }
+
+  function clearActiveFormat(){
+    if(!activeEditable) return;
+    restoreCurrentSelection();
+    const range = getSelectedTextRange();
+    if(range && !range.collapsed){
+      try{
+        document.execCommand('removeFormat', false, null);
+      }catch(err){}
+    }else{
+      activeEditable.style.removeProperty('font-size');
+      activeEditable.style.removeProperty('color');
+      activeEditable.style.removeProperty('font-weight');
+      activeEditable.style.removeProperty('font-style');
+      activeEditable.style.removeProperty('text-decoration');
+    }
+    saveCurrentSelection();
+    activeEditable.focus();
+    syncActiveEditorControls();
+  }
+
+  function bindEditorToolbar(){
+    const colorInput = $('#editorColor');
+    const btnFontDown = $('#editorDecreaseFont');
+    const btnFontUp = $('#editorIncreaseFont');
+    const btnBold = $('#editorBold');
+    const btnItalic = $('#editorItalic');
+    const btnUnderline = $('#editorUnderline');
+    const btnClear = $('#editorClearFormat');
+    const btnMarginReset = $('#btnMarginReset');
+    const mt = $('#marginTopInput');
+    const mr = $('#marginRightInput');
+    const mb = $('#marginBottomInput');
+    const ml = $('#marginLeftInput');
+
+    [btnFontDown, btnFontUp, btnBold, btnItalic, btnUnderline, btnClear, colorInput, btnMarginReset].forEach(el=>{
+      if(el && !el.dataset.mouseGuard){
+        el.dataset.mouseGuard = '1';
+        el.addEventListener('mousedown', (e)=>{ e.preventDefault(); });
+      }
+    });
+
+    if(btnFontDown && !btnFontDown.dataset.bound){
+      btnFontDown.dataset.bound = '1';
+      btnFontDown.addEventListener('click', ()=>changeSelectionFontSize(-1));
+    }
+    if(btnFontUp && !btnFontUp.dataset.bound){
+      btnFontUp.dataset.bound = '1';
+      btnFontUp.addEventListener('click', ()=>changeSelectionFontSize(1));
+    }
+    if(colorInput && !colorInput.dataset.bound){
+      colorInput.dataset.bound = '1';
+      colorInput.addEventListener('input', ()=>{
+        if(!activeEditable) return;
+        restoreCurrentSelection();
+        if(!wrapSelectionWithStyledSpan({color: colorInput.value})){
+          activeEditable.style.color = colorInput.value;
+        }
+        saveCurrentSelection();
+        activeEditable.focus();
+      });
+    }
+    if(btnBold && !btnBold.dataset.bound){
+      btnBold.dataset.bound = '1';
+      btnBold.addEventListener('click', ()=>applyCommandToSelection('bold'));
+    }
+    if(btnItalic && !btnItalic.dataset.bound){
+      btnItalic.dataset.bound = '1';
+      btnItalic.addEventListener('click', ()=>applyCommandToSelection('italic'));
+    }
+    if(btnUnderline && !btnUnderline.dataset.bound){
+      btnUnderline.dataset.bound = '1';
+      btnUnderline.addEventListener('click', ()=>applyCommandToSelection('underline'));
+    }
+    if(btnClear && !btnClear.dataset.bound){
+      btnClear.dataset.bound = '1';
+      btnClear.addEventListener('click', clearActiveFormat);
+    }
+
+    const applyMargins = ()=>{
+      const vals = [mt,mr,mb,ml].map((el, i)=>{
+        const def = [7,12,10,12][i];
+        const n = parseFloat(el && el.value);
+        return Number.isFinite(n) && n >= 0 ? n : def;
+      });
+      setPrintMarginsMM(vals[0], vals[1], vals[2], vals[3]);
+    };
+    [mt,mr,mb,ml].forEach(inp=>{
+      if(inp && !inp.dataset.bound){
+        inp.dataset.bound = '1';
+        inp.addEventListener('input', applyMargins);
+        inp.addEventListener('change', applyMargins);
+      }
+    });
+    if(btnMarginReset && !btnMarginReset.dataset.bound){
+      btnMarginReset.dataset.bound = '1';
+      btnMarginReset.addEventListener('click', ()=>setPrintMarginsMM(7,15,10,15));
+    }
+  }
+
+  function markEditable(on){
+    const targets = ['td.num','td.text','td.price','td.alg','td.label','.dayName','.dayDate','#dateRange','.pay','.foot','.saladsTitle','.bullet','.saladText','.saladPrice'];
+    const els = targets.flatMap(sel => $$(sel));
+    els.forEach(el=>{
+      if(on){
+        el.classList.add('editable');
+        el.setAttribute('contenteditable','true');
+        el.setAttribute('spellcheck','false');
+      }else{
+        el.classList.remove('editable');
+        el.removeAttribute('contenteditable');
+        el.removeAttribute('spellcheck');
+      }
+    });
+
+    if(on){
+      els.forEach(el=>{
+        if(!el.dataset.editorBound){
+          el.dataset.editorBound = '1';
+          const activate = function(){
+            activeEditable = el;
+            saveCurrentSelection();
+            syncActiveEditorControls();
+          };
+          el.addEventListener('focus', activate);
+          el.addEventListener('click', activate);
+          el.addEventListener('mouseup', function(){
+            activeEditable = el;
+            saveCurrentSelection();
+          });
+          el.addEventListener('keyup', function(){
+            activeEditable = el;
+            saveCurrentSelection();
+          });
+          el.addEventListener('input', function(){
+            activeEditable = el;
+            saveCurrentSelection();
+          });
+          el.addEventListener('keydown', function(e){
+            if(e.key === 'Enter'){
+              e.preventDefault();
+              document.execCommand('insertText', false, ' ');
+            }
+          });
+        }
+      });
+    }
+  }
+
+  function setEditMode(on){
+    document.body.classList.toggle('editMode', on);
+    markEditable(on);
+    if(!on){
+      activeEditable = null;
+      savedRange = null;
+    }
+    const btn = $('#btnEdit');
+    if(btn) btn.textContent = on ? 'Hotovo' : 'Editace';
+    syncActiveEditorControls();
+  }
+
+  function cleanupBeforeSave(){
+    setEditMode(false);
+    const wrap = document.getElementById('print2xWrap');
+    if(wrap) wrap.remove();
+  }
+
+  async function downloadHtml(filename){
+    cleanupBeforeSave();
+    const doctype = '<!doctype html>\n';
+    const htmlText = doctype + document.documentElement.outerHTML;
+    const blob = new Blob([htmlText], {type:'text/html;charset=utf-8'});
+    const finalName = filename || ("denni_menu_Terra_" + getMenuDateCode() + ".html");
+    await saveBlobSmart(finalName, blob);
+  }
+
+  const btnEdit = $('#btnEdit');
+  const btnSave = $('#btnSave');
+
+  bindEditorToolbar();
+  syncActiveEditorControls();
+
+  if(btnEdit){
+    btnEdit.addEventListener('click', ()=>{
+      const on = !document.body.classList.contains('editMode');
+      setEditMode(on);
+    });
+  }
+  if(btnSave){
+    btnSave.addEventListener('click', async ()=>{ await downloadHtml("denni_menu_Terra_" + getMenuDateCode() + ".html"); });
+  }
+
+  document.addEventListener('selectionchange', function(){
+    if(!activeEditable) return;
+    const sel = window.getSelection();
+    if(!sel || !sel.rangeCount) return;
+    const range = sel.getRangeAt(0);
+    if(activeEditable.contains(range.commonAncestorContainer)){
+      saveCurrentSelection();
+    }
+  });
+});
+</script>
+<div aria-hidden="true" class="import-modal no-print" id="importModal">
+<div class="import-box">
+<h3>Import jídel</h3>
+<p class="import-help">Vlož ručně připravená data ve formátu <b>den / datum / cena</b>. Naimportují se jen vybrané dny a jejich obsah se vždy celý nahradí novými daty.</p>
+<div class="import-day-picks" id="importDayPicks" style="margin:0 0 10px 0; display:flex; flex-wrap:wrap; gap:12px 16px; align-items:center; font-size:11pt;">
+<span style="font-weight:700;">Importovat dny:</span>
+<label><input checked="" class="import-day-check" type="checkbox" value="Po"/> Pondělí</label>
+<label><input checked="" class="import-day-check" type="checkbox" value="Út"/> Úterý</label>
+<label><input checked="" class="import-day-check" type="checkbox" value="St"/> Středa</label>
+<label><input checked="" class="import-day-check" type="checkbox" value="Čt"/> Čtvrtek</label>
+<label><input checked="" class="import-day-check" type="checkbox" value="Pá"/> Pátek</label>
+<button class="btn" id="btnDaysAll" type="button">Vše</button>
+<button class="btn" id="btnDaysNone" type="button">Nic</button>
+</div>
+<textarea id="importText" placeholder="Pondělí	9.3.2026	Cena
+Polévka	Frankfurtská polévka	49,-Kč
+Hlavní jídlo 1	Pečené kuřecí stehno, dušená rýže	159,-Kč
+Salát 1	Smažený kuřecí nebo vepřový řízek, hranolky, tatarka	159,-Kč
+Pizza	Dle jídelního lístku	169,-Kč"></textarea>
+<div class="import-actions">
+<button class="btn" id="btnLoadWebImport" type="button">Načíst z webu</button>
+<button class="btn" id="btnDoImport" type="button">Naimportovat z textu</button>
+<button class="btn" id="btnCloseImport" type="button">Zavřít</button>
+</div>
+<div style="margin-top:8px; font-size:10.5pt; color:#666;">Pravidla importu: <b>Salát 1</b> se přejmenuje na <b>Hlavní jídlo 5</b>, řádky <b>Salát 2</b> a <b>Salát 3</b> se vymažou a data vybraných dnů se vždy nahradí novými.</div>
+</div>
+</div>
+<script>(function(){
+  const DAY_NAME_TO_SHORT = {
+    'pondělí':'Po','pondeli':'Po','po':'Po',
+    'úterý':'Út','utery':'Út','út':'Út','ut':'Út',
+    'středa':'St','streda':'St','st':'St',
+    'čtvrtek':'Čt','ctvrtek':'Čt','čt':'Čt','ct':'Čt',
+    'pátek':'Pá','patek':'Pá','pá':'Pá','pa':'Pá'
+  };
+  const SHORT_TO_FULL = {'Po':'Pondělí','Út':'Úterý','St':'Středa','Čt':'Čtvrtek','Pá':'Pátek'};
+
+  function normalizeDayKey(value){
+    const k = String(value || '').trim().toLowerCase();
+    return DAY_NAME_TO_SHORT[k] || null;
+  }
+
+  function normalizePrice(value){
+    const s = String(value || '').replace(/\s+/g,' ').trim();
+    if(!s) return '';
+    const m = s.match(/(\d{1,4})\s*,?-?\s*(?:Kč)?$/i) || s.match(/(\d{1,4})/);
+    return m ? (m[1] + ',-Kč') : s;
+  }
+
+  function cleanupText(value){
+    return String(value || '').replace(/\u00a0/g,' ').replace(/\s+/g,' ').trim();
+  }
+
+  function getSelectedImportDays(){
+    return Array.from(document.querySelectorAll('.import-day-check:checked')).map(el => el.value);
+  }
+
+  function splitLine(line){
+    if(line.indexOf('\t') >= 0) return line.split('\t').map(v => v.trim());
+    return line.split(/\s{2,}/).map(v => v.trim());
+  }
+
+  function parseImportText(input){
+    const days = {};
+    let currentDay = null;
+    const lines = String(input || '').split(/\r?\n/);
+
+    for(const rawLine of lines){
+      const line = rawLine.trim();
+      if(!line) continue;
+      const cells = splitLine(line).filter(v => v !== '');
+      if(!cells.length) continue;
+
+      const dayKey = normalizeDayKey(cells[0]);
+      if(dayKey){
+        currentDay = dayKey;
+        days[currentDay] = {
+          dayKey,
+          dayName: SHORT_TO_FULL[dayKey] || cells[0],
+          date: cleanupText(cells[1] || ''),
+          rows: []
+        };
+        continue;
+      }
+      if(!currentDay) continue;
+
+      const label = cleanupText(cells[0]);
+      const low = label.toLowerCase();
+      const price = normalizePrice(cells[cells.length - 1] || '');
+      const textValue = cleanupText(cells.slice(1, Math.max(1, cells.length - 1)).join(' '));
+      let row = null;
+
+      if(low === 'polévka' || low === 'polevka'){
+        row = { cls:'soup', label:'Polévka', text:textValue, price };
+      } else {
+        let m = label.match(/^Hlavní\s+jídlo\s+(\d+)$/i) || label.match(/^Hlavni\s+jidlo\s+(\d+)$/i);
+        if(m){
+          row = { cls:'item', label:'Hlavní jídlo ' + m[1], text:textValue, price };
+        } else {
+          m = label.match(/^Salát\s+(\d+)$/i) || label.match(/^Salat\s+(\d+)$/i);
+          if(m){
+            const num = parseInt(m[1], 10);
+            if(num === 1){
+              row = { cls:'item', label:'Hlavní jídlo 5', text:textValue, price };
+            } else {
+              row = null;
+            }
+          } else if(low === 'pizza'){
+            row = { cls:'pizza', label:'Pizza', text:textValue, price };
+          }
+        }
+      }
+
+      if(row) days[currentDay].rows.push(row);
+    }
+
+    const selected = new Set(getSelectedImportDays());
+    const filtered = {};
+    Object.keys(days).forEach(dayKey => {
+      if(selected.has(dayKey)) filtered[dayKey] = days[dayKey];
+    });
+    return filtered;
+  }
+
+  function escapeHtml(value){
+    return String(value || '')
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;');
+  }
+
+  function rowHtml(row){
+    return '<tr class="' + row.cls + '">' +
+      '<td class="label editable">' + escapeHtml(row.label) + '</td>' +
+      '<td class="text editable">' + escapeHtml(row.text) + '</td>' +
+      '<td class="price editable">' + escapeHtml(row.price) + '</td>' +
+      '</tr>';
+  }
+
+  function dayOffsetFromKey(dayKey){
+    return ({'Po':0,'Út':1,'St':2,'Čt':3,'Pá':4})[dayKey] ?? 0;
+  }
+
+  function buildDaySectionHtml(dayKey, imported){
+    const rows = [];
+    rows.push(
+      '<tr class="dayHead">' +
+      '<td class="label dayName editable">' + escapeHtml(imported.dayName || SHORT_TO_FULL[dayKey] || '') + '</td>' +
+      '<td class="text"><span class="dayDate editable" data-day-offset="' + dayOffsetFromKey(dayKey) + '">' + escapeHtml(imported.date || '') + '</span></td>' +
+      '<td class="price">Cena</td>' +
+      '</tr>'
+    );
+    (imported.rows || []).forEach(row => rows.push(rowHtml(row)));
+    return '<section class="day"><table class="menu terra-menu"><tbody>' + rows.join('') + '</tbody></table></section>';
+  }
+
+  function syncImportedDateRange(){
+    const dates = Array.from(document.querySelectorAll('.dayDate')).map(el => (el.textContent || '').trim()).filter(Boolean);
+    const target = document.getElementById('dateRange');
+    if(!target || !dates.length) return;
+    const first = dates[0].match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+    const last = dates[dates.length - 1].match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+    if(first && last){
+      target.textContent = first[1] + '.' + first[2] + '. – ' + last[1] + '.' + last[2] + '. ' + last[3];
+    }
+  }
+
+  function applyImport(days){
+    const content = document.querySelector('main.content');
+    if(!content) return 0;
+
+    const selectedOrder = getSelectedImportDays();
+    const dayKeysToRender = selectedOrder.filter(dayKey => !!days[dayKey]);
+    if(!dayKeysToRender.length) return 0;
+
+    content.querySelectorAll('section.day').forEach(section => section.remove());
+
+    const anchor = content.querySelector('.foot') || content.firstChild;
+    dayKeysToRender.forEach(dayKey => {
+      const imported = days[dayKey];
+      if(!imported) return;
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = buildDaySectionHtml(dayKey, imported);
+      const section = wrapper.firstElementChild;
+      if(anchor) content.insertBefore(section, anchor);
+      else content.appendChild(section);
+    });
+
+    syncImportedDateRange();
+    return dayKeysToRender.length;
+  }
+
+  function openImportModal(){
+    const modal = document.getElementById('importModal');
+    if(!modal) return;
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden','false');
+    const ta = document.getElementById('importText');
+    if(ta) ta.focus();
+  }
+
+  function closeImportModal(){
+    const modal = document.getElementById('importModal');
+    if(!modal) return;
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden','true');
+  }
+
+
+  async function fetchTextWithFallbacks(urls){
+    let lastErr = null;
+    for(const url of urls){
+      try{
+        const res = await fetch(url, { cache:'no-store' });
+        if(!res.ok) throw new Error('HTTP ' + res.status);
+        return await res.text();
+      }catch(err){
+        lastErr = err;
+      }
+    }
+    throw lastErr || new Error('Načtení z webu selhalo.');
+  }
+
+  function extractBodyText(raw){
+    const txt = String(raw || '');
+    if(/<html[\s>]/i.test(txt) || /<body[\s>]/i.test(txt)){
+      const doc = new DOMParser().parseFromString(txt, 'text/html');
+      return (doc.body && (doc.body.innerText || doc.body.textContent) || txt);
+    }
+    return txt;
+  }
+
+  function formatWebImportText(raw){
+    let txt = extractBodyText(raw)
+      .replace(/\u00a0/g,' ')
+      .replace(/\r/g,'')
+      .replace(/[ \t]+/g,' ')
+      .replace(/\n{2,}/g,'\n')
+      .trim();
+
+    txt = txt.replace(/verze pro tisk\s*\|\s*pdf verze/ig, ' ');
+    txt = txt.replace(/Plzeň Web vytvořil[\s\S]*$/i, ' ');
+    txt = txt.replace(/\[Zobrazit[^\]]*\]\([^)]+\)/gi, ' ');
+    txt = txt.replace(/mailto:[^\s)]+/gi, ' ');
+    txt = txt.replace(/https?:\/\/\S+/gi, ' ');
+    txt = txt.replace(/\b(Pondělí|Úterý|Středa|Čtvrtek|Pátek)\b/gi, '\n$1');
+    txt = txt.replace(/\b(Polévka|Hlavní jídlo\s*[1-5]|Hlavni jidlo\s*[1-5]|Salát\s*[1-3]|Salat\s*[1-3])\b/gi, '\n$1');
+    txt = txt.replace(/\bPizza\s+(Dle\s+jídelního\s+lístku)\b/gi, '\nPizza $1');
+    txt = txt.replace(/\n+/g,'\n').trim();
+
+    const dayHeaderRe = /^(Pondělí|Úterý|Středa|Čtvrtek|Pátek)\s*,?\s*(\d{1,2}\.\d{1,2}\.\d{4})\s*,?\s*(Cena)?\s*$/i;
+    const rowLabelRe = /^(Polévka|Hlavní jídlo\s*[1-5]|Hlavni jidlo\s*[1-5]|Salát\s*[1-3]|Salat\s*[1-3]|Pizza(?:\s+Dle\s+jídelního\s+lístku)?)\s*(.*)$/i;
+    const footerRe = /^(Plzeň Web vytvořil|Zobrazit klasickou verzi|Zobrazit mobilní verzi webu|http\b|\.cz\/poledni\.php)/i;
+    const lines = txt.split(/\n/).map(v => v.trim()).filter(Boolean);
+
+    const out = [];
+    let currentDay = null;
+
+    for(let i = 0; i < lines.length; i++){
+      const line = lines[i];
+      if(footerRe.test(line)) break;
+
+      const dh = line.match(dayHeaderRe);
+      if(dh){
+        currentDay = dh[1];
+        out.push(currentDay + '\t' + dh[2] + '\tCena');
+        continue;
+      }
+
+      const rm = line.match(rowLabelRe);
+      if(rm && currentDay){
+        let label = rm[1].replace(/Hlavni jidlo/i, 'Hlavní jídlo').replace(/Salat/i, 'Salát');
+        if(/^Pizza\s+Dle\s+jídelního\s+lístku$/i.test(label)){
+          label = 'Pizza';
+        }
+
+        let chunks = [];
+        let rest0 = (rm[2] || '').trim();
+        if(rest0) chunks.push(rest0);
+
+        while(i + 1 < lines.length){
+          const next = lines[i + 1].trim();
+          if(!next || footerRe.test(next)) break;
+          if(dayHeaderRe.test(next)) break;
+
+          const nextRm = next.match(rowLabelRe);
+          if(nextRm){
+            let nextLabel = nextRm[1].replace(/Hlavni jidlo/i, 'Hlavní jídlo').replace(/Salat/i, 'Salát');
+            if(nextLabel.toLowerCase() === label.toLowerCase()){
+              const extra = (nextRm[2] || '').trim();
+              if(extra) chunks.push(extra);
+              i++;
+              continue;
+            }
+            break;
+          }
+
+          chunks.push(next);
+          i++;
+        }
+
+        let combined = chunks.join(' ').replace(/\s+/g,' ').trim();
+        combined = combined.replace(/^(Polévka|Pizza)\s+/i, '').trim();
+        combined = combined.replace(/\s*(Plzeň Web vytvořil|Zobrazit klasickou verzi|Zobrazit mobilní verzi webu)[\s\S]*$/i, '').trim();
+
+        let price = '';
+        const priceMatches = [...combined.matchAll(/(\d{1,4}\s*,-\s*Kč|\d{1,4},-\s*Kč|\d{1,4}\s*Kč)/gi)];
+        if(priceMatches.length){
+          const last = priceMatches[priceMatches.length - 1];
+          price = last[0].replace(/\s+/g,'').replace(/(\d+),-Kč/i, '$1,-Kč').replace(/(\d+)Kč/i, '$1,-Kč');
+          combined = combined.slice(0, last.index).trim();
+        }
+
+        if(label.toLowerCase() === 'pizza'){
+          combined = 'Dle jídelního lístku';
+        }
+
+        if(combined || price){
+          out.push(label + '\t' + combined + '\t' + price);
+        }
+      }
+    }
+
+    return out.join('\n').trim();
+  }
+
+  async function loadImportFromWeb(){
+    const btn = document.getElementById('btnLoadWebImport');
+    const ta = document.getElementById('importText');
+    if(!ta) return;
+    const old = btn ? btn.textContent : '';
+    if(btn){ btn.disabled = true; btn.textContent = 'Načítám…'; }
+    try{
+      const sourceUrl = 'http://plzen-pizza.cz/poledni.php';
+      const urls = [
+        sourceUrl,
+        'https://r.jina.ai/http://plzen-pizza.cz/poledni.php',
+        'https://api.allorigins.win/raw?url=' + encodeURIComponent(sourceUrl)
+      ];
+      const raw = await fetchTextWithFallbacks(urls);
+      const formatted = formatWebImportText(raw);
+      if(!formatted){
+        throw new Error('Na stránce se nepodařilo najít menu.');
+      }
+      ta.value = formatted;
+      ta.focus();
+      alert('Menu z webu bylo načteno do importního pole. Teď můžeš kliknout na „Naimportovat z textu“.');
+    }catch(err){
+      alert('Načtení z webu se nepodařilo. Zkus ruční vložení textu.\n\nDetail: ' + (err && err.message ? err.message : err));
+    }finally{
+      if(btn){ btn.disabled = false; btn.textContent = old || 'Načíst z webu'; }
+    }
+  }
+
+  function doImport(){
+    const selected = getSelectedImportDays();
+    if(!selected.length){
+      alert('Vyber aspoň jeden den pro import.');
+      return;
+    }
+    const ta = document.getElementById('importText');
+    const value = ta ? ta.value : '';
+    const parsed = parseImportText(value);
+    const changed = applyImport(parsed);
+    if(!changed){
+      alert('Import nic nenašel. Zkontroluj, že vkládáš řádky ve formátu: Pondělí / datum / Cena, potom Polévka, Hlavní jídlo 1–4, Salát 1 a Pizza.');
+      return;
+    }
+    closeImportModal();
+    alert('Naimportováno: ' + changed + ' dnů.');
+  }
+
+  function bindImportControls(){
+    const btnImport = document.getElementById('btnImport');
+    const btnLoadWebImport = document.getElementById('btnLoadWebImport');
+    const btnDoImport = document.getElementById('btnDoImport');
+    const btnCloseImport = document.getElementById('btnCloseImport');
+    const btnDaysAll = document.getElementById('btnDaysAll');
+    const btnDaysNone = document.getElementById('btnDaysNone');
+    const modal = document.getElementById('importModal');
+
+    if(btnImport && !btnImport.dataset.boundImport){ btnImport.dataset.boundImport = '1'; btnImport.addEventListener('click', openImportModal); }
+    if(btnLoadWebImport && !btnLoadWebImport.dataset.boundImport){ btnLoadWebImport.dataset.boundImport = '1'; btnLoadWebImport.addEventListener('click', loadImportFromWeb); }
+    if(btnDoImport && !btnDoImport.dataset.boundImport){ btnDoImport.dataset.boundImport = '1'; btnDoImport.addEventListener('click', doImport); }
+    if(btnCloseImport && !btnCloseImport.dataset.boundImport){ btnCloseImport.dataset.boundImport = '1'; btnCloseImport.addEventListener('click', closeImportModal); }
+    if(btnDaysAll && !btnDaysAll.dataset.boundImport){ btnDaysAll.dataset.boundImport = '1'; btnDaysAll.addEventListener('click', () => document.querySelectorAll('.import-day-check').forEach(el => el.checked = true)); }
+    if(btnDaysNone && !btnDaysNone.dataset.boundImport){ btnDaysNone.dataset.boundImport = '1'; btnDaysNone.addEventListener('click', () => document.querySelectorAll('.import-day-check').forEach(el => el.checked = false)); }
+    if(modal && !modal.dataset.boundImport){ modal.dataset.boundImport = '1'; modal.addEventListener('click', e => { if(e.target === modal) closeImportModal(); }); }
+    if(!document.body.dataset.boundImportEscape){ document.body.dataset.boundImportEscape = '1'; document.addEventListener('keydown', e => { if(e.key === 'Escape') closeImportModal(); }); }
+  }
+
+  window.openImportModal = openImportModal;
+  window.closeImportModal = closeImportModal;
+  window.doImport = doImport;
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindImportControls);
+  else bindImportControls();
+})();</script>
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+  const pay = document.querySelector(".pay");
+  const toolbar = document.getElementById("payToolbar");
+  const colorInput = document.getElementById("payColor");
+  const btnNormal = document.getElementById("payNormal");
+  const btnBold = document.getElementById("payBold");
+  const btnItalic = document.getElementById("payItalic");
+  const btnUnderline = document.getElementById("payUnderline");
+
+  if(!pay || !toolbar) return;
+
+  function syncToolbar(){
+    const on = document.body.classList.contains("editMode");
+    toolbar.style.display = on ? "block" : "none";
+  }
+
+  function focusPay(){
+    pay.focus();
+  }
+
+  if(colorInput){
+    colorInput.addEventListener("input", function(){
+      pay.style.color = colorInput.value;
+      focusPay();
+    });
+  }
+
+  if(btnNormal){
+    btnNormal.addEventListener("click", function(){
+      pay.style.fontWeight = "700";
+      pay.style.fontStyle = "italic";
+      pay.style.textDecoration = "underline";
+      focusPay();
+    });
+  }
+
+  if(btnBold){
+    btnBold.addEventListener("click", function(){
+      pay.style.fontWeight = (pay.style.fontWeight === "700" || pay.style.fontWeight === "bold") ? "400" : "700";
+      focusPay();
+    });
+  }
+
+  if(btnItalic){
+    btnItalic.addEventListener("click", function(){
+      pay.style.fontStyle = pay.style.fontStyle === "italic" ? "normal" : "italic";
+      focusPay();
+    });
+  }
+
+  if(btnUnderline){
+    btnUnderline.addEventListener("click", function(){
+      pay.style.textDecoration = pay.style.textDecoration === "underline" ? "none" : "underline";
+      focusPay();
+    });
+  }
+
+  syncToolbar();
+  const obs = new MutationObserver(syncToolbar);
+  obs.observe(document.body, {attributes:true, attributeFilter:["class"]});
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+  const btnUndo = document.getElementById("btnUndoEdit");
+  const btnRedo = document.getElementById("btnRedoEdit");
+  if(!btnUndo) return;
+
+  const selectors = ['td.num','td.text','td.price','td.alg','td.label','.dayName','.dayDate','#dateRange','.pay','.foot','.saladsTitle','.bullet','.saladText','.saladPrice'];
+  const historyStack = [];
+  const redoStack = [];
+  let isRestoring = false;
+
+  function getTargets(){
+    return Array.from(document.querySelectorAll(selectors.join(',')));
+  }
+
+  function snapshot(){
+    return {
+      items: getTargets().map((el, idx) => ({
+        idx,
+        html: el.innerHTML,
+        style: el.getAttribute('style') || ''
+      })),
+      rootStyle: document.documentElement.getAttribute('style') || ''
+    };
+  }
+
+  function sameState(a, b){
+    return JSON.stringify(a) === JSON.stringify(b);
+  }
+
+  function pushState(clearRedo = true){
+    const state = snapshot();
+    if(historyStack.length === 0 || !sameState(historyStack[historyStack.length - 1], state)){
+      historyStack.push(state);
+      if(clearRedo) redoStack.length = 0;
+      if(historyStack.length > 100){
+        historyStack.shift();
+      }
+    }
+  }
+
+  function restore(state){
+    if(!state) return;
+    isRestoring = true;
+    const targets = getTargets();
+    (state.items || []).forEach(item => {
+      const el = targets[item.idx];
+      if(!el) return;
+      el.innerHTML = item.html;
+      if(item.style){
+        el.setAttribute('style', item.style);
+      } else {
+        el.removeAttribute('style');
+      }
+    });
+    if(state.rootStyle){
+      document.documentElement.setAttribute('style', state.rootStyle);
+    } else {
+      document.documentElement.removeAttribute('style');
+    }
+    isRestoring = false;
+  }
+
+  // initial state
+  pushState();
+
+  document.addEventListener('input', function(e){
+    if(isRestoring) return;
+    if(e.target && e.target.matches(selectors.join(','))){
+      pushState();
+    }
+  }, true);
+
+  document.addEventListener('blur', function(e){
+    if(isRestoring) return;
+    if(e.target && e.target.matches(selectors.join(','))){
+      pushState();
+    }
+  }, true);
+
+  document.addEventListener('click', function(e){
+    const id = e.target && e.target.id;
+    if(['payNormal','payBold','payItalic','payUnderline','payColor','editorBold','editorItalic','editorUnderline','editorClearFormat','btnMarginReset'].includes(id)){
+      setTimeout(()=>pushState(), 0);
+    }
+  }, true);
+
+  document.addEventListener('change', function(e){
+    const id = e.target && e.target.id;
+    if(['editorColor','marginTopInput','marginRightInput','marginBottomInput','marginLeftInput'].includes(id)){
+      setTimeout(()=>pushState(), 0);
+    }
+  }, true);
+
+  btnUndo.addEventListener('click', function(){
+    if(historyStack.length < 2) return;
+    const current = historyStack.pop();
+    redoStack.push(current);
+    restore(historyStack[historyStack.length - 1]);
+  });
+
+  if(btnRedo){
+    btnRedo.addEventListener('click', function(){
+      if(!redoStack.length) return;
+      const next = redoStack.pop();
+      historyStack.push(next);
+      restore(next);
+    });
+  }
+});
+</script>
+<script>
+(function(){
+  function formatDotDate(d){ return d.getDate()+'.'+(d.getMonth()+1)+'.'+d.getFullYear(); }
+  function syncDateRangeFromDays(){
+    const dates=[...document.querySelectorAll('.dayDate')].map(el=>el.textContent.trim()).filter(Boolean);
+    const hidden=document.getElementById('dateRange');
+    if(!hidden || !dates.length) return;
+    const first=dates[0].match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+    const last=dates[dates.length-1].match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+    if(first && last){ hidden.textContent = first[1]+'.'+first[2]+'. – '+last[1]+'.'+last[2]+'. '+last[3]; }
+  }
+  const oldFill=window.fillNextWeek;
+  window.fillNextWeek=function(){
+    let mon=new Date();
+    let day=mon.getDay();
+    let diff=(8-day)%7;
+    if(diff===0) diff=7;
+    mon.setDate(mon.getDate()+diff);
+    document.querySelectorAll('.dayDate').forEach((el)=>{
+      const off=parseInt(el.dataset.dayOffset||'0',10);
+      const d=new Date(mon);
+      d.setDate(mon.getDate()+off);
+      el.textContent=formatDotDate(d);
+    });
+    syncDateRangeFromDays();
+  };
+  document.addEventListener('DOMContentLoaded', syncDateRangeFromDays);
+})();
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+  function removeEmptyRowIfNeeded(td){
+    if(!td || !td.closest) return;
+    const tr = td.closest("tr");
+    if(!tr) return;
+    if(tr.classList.contains("dayHead")) return;
+    if(tr.closest('.salads')) return;
+
+    const text = tr.querySelector(".text");
+    const price = tr.querySelector(".price");
+    const label = tr.querySelector(".label");
+
+    const textVal = (text?.innerText || "").replace(/ /g, " ").trim();
+    const priceVal = (price?.innerText || "").replace(/ /g, " ").trim();
+    const labelVal = (label?.innerText || "").replace(/ /g, " ").trim();
+
+    if(textVal === "" && priceVal === "" && labelVal === ""){
+      tr.remove();
+    }
+  }
+
+  document.addEventListener("blur", function(e){
+    const t = e.target;
+    if(!t || !t.matches || !t.matches('td.text, td.price, td.label, td.num, td.alg, .saladText, .saladPrice, .bullet')) return;
+    removeEmptyRowIfNeeded(t);
+  }, true);
+}, true);
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+  function isMenuDataRow(tr){
+    return !!tr && tr.matches('table.menu tr') && !tr.classList.contains('dayHead');
+  }
+
+  function isSaladRow(tr){
+    return !!tr && !!tr.closest('.salads') && tr.matches('.salads table tr');
+  }
+
+  function makeToolButton(symbol, title, cls){
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = symbol;
+    btn.title = title;
+    btn.className = 'rowToolBtn ' + cls;
+    btn.setAttribute('contenteditable', 'false');
+    return btn;
+  }
+
+  function createNewRowFrom(tr){
+    const currentClass = tr.classList.contains('item') ? 'item' : (tr.classList.contains('pizza') ? 'pizza' : (tr.classList.contains('soup') ? 'soup' : 'item'));
+    let newTr;
+
+    if(currentClass === 'item'){
+      newTr = tr.cloneNode(true);
+      const label = newTr.querySelector('.label');
+      if(label) label.textContent = 'Hlavní jídlo';
+    }else if(currentClass === 'soup'){
+      newTr = document.createElement('tr');
+      newTr.className = 'item';
+      newTr.innerHTML = '<td class="label editable">Hlavní jídlo</td><td class="text editable"></td><td class="price editable"></td>';
+    }else{
+      newTr = document.createElement('tr');
+      newTr.className = 'item';
+      newTr.innerHTML = '<td class="label editable">Hlavní jídlo</td><td class="text editable"></td><td class="price editable"></td>';
+    }
+
+    const textCell = newTr.querySelector('.text');
+    const priceCell = newTr.querySelector('.price');
+    if(textCell) textCell.textContent = '';
+    if(priceCell) priceCell.textContent = '';
+    newTr.querySelectorAll('.editable').forEach(el=>{
+      el.setAttribute('contenteditable','true');
+    });
+    return newTr;
+  }
+
+  function createNewSaladRow(){
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td class="bullet editable">-</td><td class="saladText editable"></td><td class="saladPrice editable"></td>';
+    tr.querySelectorAll('.editable').forEach(el=>{
+      el.setAttribute('contenteditable','true');
+    });
+    return tr;
+  }
+
+  function focusEditableEnd(target){
+    if(!target) return;
+    target.focus();
+    try{
+      const sel = window.getSelection();
+      const range = document.createRange();
+      range.selectNodeContents(target);
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }catch(err){}
+  }
+
+  function ensureToolsForMenuRow(tr){
+    if(!isMenuDataRow(tr)) return;
+    const td = tr.querySelector('td.price');
+    if(!td) return;
+    let wrap = td.querySelector('.rowToolsWrap');
+    if(wrap) return;
+
+    wrap = document.createElement('span');
+    wrap.className = 'rowToolsWrap';
+    wrap.setAttribute('contenteditable', 'false');
+
+    const addBtn = makeToolButton('＋', 'Vložit řádek pod tento řádek', 'rowAddBtn');
+    const delBtn = makeToolButton('🗑', 'Smazat řádek', 'rowDeleteBtn');
+
+    addBtn.addEventListener('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      const newTr = createNewRowFrom(tr);
+      tr.insertAdjacentElement('afterend', newTr);
+      ensureToolsForMenuRow(newTr);
+      focusEditableEnd(newTr.querySelector('.text') || newTr.querySelector('.label'));
+    });
+
+    delBtn.addEventListener('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      tr.remove();
+    });
+
+    wrap.appendChild(addBtn);
+    wrap.appendChild(delBtn);
+    td.appendChild(document.createTextNode(' '));
+    td.appendChild(wrap);
+
+    td.addEventListener('mousedown', function(e){
+      if(e.target.closest('.rowToolsWrap')) return;
+      const textNode = Array.from(td.childNodes).find(n => n.nodeType === Node.TEXT_NODE);
+      if(textNode && (!td.textContent || td.textContent.trim() === '')){
+        e.preventDefault();
+        focusEditableEnd(td);
+      }
+    });
+  }
+
+  function ensureToolsForSaladRow(tr){
+    if(!isSaladRow(tr)) return;
+    const td = tr.querySelector('td.saladPrice');
+    if(!td) return;
+    if(td.querySelector('.rowToolsWrap')) return;
+
+    const wrap = document.createElement('span');
+    wrap.className = 'rowToolsWrap';
+    wrap.setAttribute('contenteditable', 'false');
+
+    const addBtn = makeToolButton('＋', 'Vložit řádek pod tento řádek', 'rowAddBtn');
+    const delBtn = makeToolButton('🗑', 'Smazat řádek', 'rowDeleteBtn');
+
+    addBtn.addEventListener('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      const newTr = createNewSaladRow();
+      tr.insertAdjacentElement('afterend', newTr);
+      ensureToolsForSaladRow(newTr);
+      focusEditableEnd(newTr.querySelector('.saladText'));
+    });
+
+    delBtn.addEventListener('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      tr.remove();
+    });
+
+    wrap.appendChild(addBtn);
+    wrap.appendChild(delBtn);
+    td.appendChild(document.createTextNode(' '));
+    td.appendChild(wrap);
+  }
+
+  function ensureAllRowTools(){
+    document.querySelectorAll('table.menu tr').forEach(ensureToolsForMenuRow);
+    document.querySelectorAll('.salads table tr').forEach(ensureToolsForSaladRow);
+  }
+
+  ensureAllRowTools();
+
+  document.addEventListener('focusin', function(e){
+    const t = e.target;
+    if(t && t.matches && t.matches('td.price, td.saladPrice')){
+      const wrap = t.querySelector('.rowToolsWrap');
+      if(wrap && t.textContent.replace(wrap.textContent,'').trim() === ''){
+        focusEditableEnd(t);
+      }
+    }
+  });
+
+  const observer = new MutationObserver(function(){
+    ensureAllRowTools();
+  });
+  observer.observe(document.body, { childList:true, subtree:true });
+});
+</script></script></body></html>
