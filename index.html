@@ -2072,10 +2072,10 @@ Pizza	Dle jídelního lístku	169,-Kč"></textarea>
 </div>
 <script>(function(){
   const DAY_NAME_TO_SHORT = {
-    'pondělí':'Po','pondeli':'Po','po':'Po',
+    'pondělí':'Po','pondeli':'Po','pondìlí':'Po','po':'Po',
     'úterý':'Út','utery':'Út','út':'Út','ut':'Út',
-    'středa':'St','streda':'St','st':'St',
-    'čtvrtek':'Čt','ctvrtek':'Čt','čt':'Čt','ct':'Čt',
+    'středa':'St','streda':'St','støeda':'St','st':'St',
+    'čtvrtek':'Čt','ctvrtek':'Čt','ètvrtek':'Čt','čt':'Čt','ct':'Čt',
     'pátek':'Pá','patek':'Pá','pá':'Pá','pa':'Pá'
   };
   const SHORT_TO_FULL = {'Po':'Pondělí','Út':'Úterý','St':'Středa','Čt':'Čtvrtek','Pá':'Pátek'};
@@ -2094,6 +2094,114 @@ Pizza	Dle jídelního lístku	169,-Kč"></textarea>
 
   function cleanupText(value){
     return String(value || '').replace(/\u00a0/g,' ').replace(/\s+/g,' ').trim();
+  }
+
+  function fixWebText(value){
+    return cleanupText(value)
+      .replace(/Kè/g,'Kč')
+      .replace(/Pondìlí/g,'Pondělí')
+      .replace(/Støeda/g,'Středa')
+      .replace(/Ètvrtek/g,'Čtvrtek');
+  }
+
+  function inferDateYear(day, month){
+    const today = new Date();
+    let year = today.getFullYear();
+    let candidate = new Date(year, month - 1, day);
+    const halfYearMs = 183 * 24 * 60 * 60 * 1000;
+    if(candidate.getTime() < today.getTime() - halfYearMs) year++;
+    if(candidate.getTime() > today.getTime() + halfYearMs) year--;
+    return year;
+  }
+
+  function normalizeImportDate(value){
+    const s = cleanupText(value);
+    const m = s.match(/^(\d{1,2})\.\s*(\d{1,2})\.?\s*(\d{4})?$/);
+    if(!m) return s;
+    const day = parseInt(m[1], 10);
+    const month = parseInt(m[2], 10);
+    let year = m[3] ? parseInt(m[3], 10) : inferDateYear(day, month);
+    if(year <= 1970) year = inferDateYear(day, month);
+    return day + '.' + month + '.' + year;
+  }
+
+  function parseDotDate(value){
+    const m = cleanupText(value).match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+    if(!m) return null;
+    return new Date(parseInt(m[3], 10), parseInt(m[2], 10) - 1, parseInt(m[1], 10));
+  }
+
+  function formatFullDate(d){
+    return d.getDate() + '.' + (d.getMonth() + 1) + '.' + d.getFullYear();
+  }
+
+  function mondayOffsetFromDate(d){
+    return (d.getDay() + 6) % 7;
+  }
+
+  function getImportWeekMonday(headers){
+    if(!headers.length) return null;
+
+    const matching = headers.find(header => mondayOffsetFromDate(header.date) === dayOffsetFromKey(header.dayKey));
+    if(matching){
+      const monday = new Date(matching.date);
+      monday.setDate(matching.date.getDate() - dayOffsetFromKey(matching.dayKey));
+      return monday;
+    }
+
+    const monday = new Date(headers[0].date);
+    monday.setDate(headers[0].date.getDate() - mondayOffsetFromDate(headers[0].date));
+    return monday;
+  }
+
+  function normalizeDayDates(days){
+    const order = ['Po','Út','St','Čt','Pá'];
+    const headers = [];
+    for(const dayKey of order){
+      if(!days[dayKey] || !days[dayKey].date) continue;
+      const date = parseDotDate(normalizeImportDate(days[dayKey].date));
+      if(date) headers.push({ dayKey, date });
+    }
+
+    const monday = getImportWeekMonday(headers);
+    if(!monday) return days;
+
+    order.forEach(dayKey => {
+      if(!days[dayKey]) return;
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + dayOffsetFromKey(dayKey));
+      days[dayKey].date = formatFullDate(d);
+    });
+    return days;
+  }
+
+  function normalizeFormattedImportDates(text){
+    const lines = String(text || '').split(/\r?\n/);
+    const headers = [];
+
+    lines.forEach((line, index) => {
+      const cells = splitLine(line).filter(v => v !== '');
+      if(cells.length < 2) return;
+      const dayKey = normalizeDayKey(cells[0]);
+      if(!dayKey) return;
+      const date = parseDotDate(normalizeImportDate(cells[1]));
+      if(date) headers.push({ index, dayKey, date });
+    });
+
+    if(!headers.length) return String(text || '');
+
+    const monday = getImportWeekMonday(headers);
+    if(!monday) return String(text || '');
+
+    headers.forEach(header => {
+      const cells = splitLine(lines[header.index]).filter(v => v !== '');
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + dayOffsetFromKey(header.dayKey));
+      cells[1] = formatFullDate(d);
+      lines[header.index] = cells.join('\t');
+    });
+
+    return lines.join('\n');
   }
 
   function getSelectedImportDays(){
@@ -2122,7 +2230,7 @@ Pizza	Dle jídelního lístku	169,-Kč"></textarea>
         days[currentDay] = {
           dayKey,
           dayName: SHORT_TO_FULL[dayKey] || cells[0],
-          date: cleanupText(cells[1] || ''),
+          date: normalizeImportDate(cells[1] || ''),
           rows: []
         };
         continue;
@@ -2164,7 +2272,7 @@ Pizza	Dle jídelního lístku	169,-Kč"></textarea>
     Object.keys(days).forEach(dayKey => {
       if(selected.has(dayKey)) filtered[dayKey] = days[dayKey];
     });
-    return filtered;
+    return normalizeDayDates(filtered);
   }
 
   function escapeHtml(value){
@@ -2259,6 +2367,14 @@ Pizza	Dle jídelního lístku	169,-Kč"></textarea>
       try{
         const res = await fetch(url, { cache:'no-store' });
         if(!res.ok) throw new Error('HTTP ' + res.status);
+        if(/plzen-pizza\.cz/i.test(url) && !/r\.jina\.ai|allorigins/i.test(url)){
+          const buffer = await res.arrayBuffer();
+          try{
+            return new TextDecoder('windows-1250').decode(buffer);
+          }catch(_){
+            return new TextDecoder('utf-8').decode(buffer);
+          }
+        }
         return await res.text();
       }catch(err){
         lastErr = err;
@@ -2276,7 +2392,82 @@ Pizza	Dle jídelního lístku	169,-Kč"></textarea>
     return txt;
   }
 
+  function stripWebHtml(value){
+    return fixWebText(String(value || '')
+      .replace(/<br\s*\/?>/gi, ' ')
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/&nbsp;/gi, ' ')
+      .replace(/&amp;/gi, '&'));
+  }
+
+  function getWebTableRows(raw){
+    const txt = String(raw || '');
+    const rows = [];
+    const trRe = /<tr\b([^>]*)>([\s\S]*?)<\/tr>/gi;
+    let trMatch;
+    while((trMatch = trRe.exec(txt))){
+      const attrs = trMatch[1] || '';
+      const body = trMatch[2] || '';
+      const cells = [];
+      const tdRe = /<td\b[^>]*>([\s\S]*?)(?=<td\b|<\/tr>|$)/gi;
+      let tdMatch;
+      while((tdMatch = tdRe.exec(body))){
+        cells.push(stripWebHtml(tdMatch[1] || ''));
+      }
+      if(cells.length){
+        rows.push({
+          isDay: /\bclass\s*=\s*["'][^"']*\bden\b/i.test(attrs),
+          cells
+        });
+      }
+    }
+    return rows;
+  }
+
+  function formatWebTableImportText(raw){
+    const txt = String(raw || '');
+    if(!/<tr[\s>]/i.test(txt)) return '';
+
+    let rows = getWebTableRows(txt);
+    if(!rows.length && typeof DOMParser !== 'undefined'){
+      const doc = new DOMParser().parseFromString(txt, 'text/html');
+      rows = Array.from(doc.querySelectorAll('#poledni tr, table tr')).map(tr => ({
+        isDay: tr.classList.contains('den'),
+        cells: Array.from(tr.querySelectorAll('td')).map(td => fixWebText(td.textContent || ''))
+      }));
+    }
+    if(!rows.length) return '';
+
+    const out = [];
+    let currentDay = null;
+
+    rows.forEach(row => {
+      const cells = row.cells || [];
+      if(cells.length < 2) return;
+
+      const first = fixWebText(cells[0] || '');
+      const second = fixWebText(cells[1] || '');
+      const third = fixWebText(cells[2] || '');
+      const dayKey = normalizeDayKey(first);
+
+      if(dayKey && (row.isDay || /^\d{1,2}\./.test(second))){
+        currentDay = dayKey;
+        out.push((SHORT_TO_FULL[dayKey] || first) + '\t' + normalizeImportDate(second) + '\tCena');
+        return;
+      }
+
+      if(!currentDay || !first) return;
+      if(/^(verze pro tisk|pdf verze)$/i.test(first)) return;
+      out.push(first + '\t' + second + '\t' + normalizePrice(third));
+    });
+
+    return out.join('\n').trim();
+  }
+
   function formatWebImportText(raw){
+    const tableText = formatWebTableImportText(raw);
+    if(tableText) return normalizeFormattedImportDates(tableText);
+
     let txt = extractBodyText(raw)
       .replace(/\u00a0/g,' ')
       .replace(/\r/g,'')
@@ -2294,7 +2485,9 @@ Pizza	Dle jídelního lístku	169,-Kč"></textarea>
     txt = txt.replace(/\bPizza\s+(Dle\s+jídelního\s+lístku)\b/gi, '\nPizza $1');
     txt = txt.replace(/\n+/g,'\n').trim();
 
-    const dayHeaderRe = /^(Pondělí|Úterý|Středa|Čtvrtek|Pátek)\s*,?\s*(\d{1,2}\.\d{1,2}\.\d{4})\s*,?\s*(Cena)?\s*$/i;
+    const dayHeaderRe = /^(Pondělí|Úterý|Středa|Čtvrtek|Pátek)\s*,?\s*(\d{1,2})\.\s*(\d{1,2})\.?\s*(\d{4})?\s*,?\s*(Cena)?\s*$/i;
+    const dayOnlyRe = /^(Pondělí|Úterý|Středa|Čtvrtek|Pátek)\s*$/i;
+    const dateOnlyRe = /^(\d{1,2})\.\s*(\d{1,2})\.?\s*(\d{4})?\s*,?\s*(Cena)?\s*$/i;
     const rowLabelRe = /^(Polévka|Hlavní jídlo\s*[1-5]|Hlavni jidlo\s*[1-5]|Salát\s*[1-3]|Salat\s*[1-3]|Pizza(?:\s+Dle\s+jídelního\s+lístku)?)\s*(.*)$/i;
     const footerRe = /^(Plzeň Web vytvořil|Zobrazit klasickou verzi|Zobrazit mobilní verzi webu|http\b|\.cz\/poledni\.php)/i;
     const lines = txt.split(/\n/).map(v => v.trim()).filter(Boolean);
@@ -2309,7 +2502,16 @@ Pizza	Dle jídelního lístku	169,-Kč"></textarea>
       const dh = line.match(dayHeaderRe);
       if(dh){
         currentDay = dh[1];
-        out.push(currentDay + '\t' + dh[2] + '\tCena');
+        out.push(currentDay + '\t' + normalizeImportDate(dh[2] + '.' + dh[3] + '.' + (dh[4] || '')) + '\tCena');
+        continue;
+      }
+
+      const dayOnly = line.match(dayOnlyRe);
+      const nextDate = dayOnly && i + 1 < lines.length ? lines[i + 1].match(dateOnlyRe) : null;
+      if(dayOnly && nextDate){
+        currentDay = dayOnly[1];
+        out.push(currentDay + '\t' + normalizeImportDate(nextDate[1] + '.' + nextDate[2] + '.' + (nextDate[3] || '')) + '\tCena');
+        i++;
         continue;
       }
 
@@ -2328,6 +2530,7 @@ Pizza	Dle jídelního lístku	169,-Kč"></textarea>
           const next = lines[i + 1].trim();
           if(!next || footerRe.test(next)) break;
           if(dayHeaderRe.test(next)) break;
+          if(dayOnlyRe.test(next)) break;
 
           const nextRm = next.match(rowLabelRe);
           if(nextRm){
@@ -2367,7 +2570,7 @@ Pizza	Dle jídelního lístku	169,-Kč"></textarea>
       }
     }
 
-    return out.join('\n').trim();
+    return normalizeFormattedImportDates(out.join('\n').trim());
   }
 
   async function loadImportFromWeb(){
